@@ -19,6 +19,8 @@ log/*
 
 .byebug_history
 
+*.sublime-workspace
+
 # VIM swp files
 *.swp
 
