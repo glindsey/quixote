@@ -9,8 +9,14 @@ module Elements
       # Process the I/O stacks. Returns output, input, success.
       def process(input, _output, **_args)
         # Try parsing as either a compound 'and' or a compound 'or'.
-        CompoundAnd.process(input, output, **args) ||
-          CompoundOr.process(input, output, **args)
+        [CompoundAnd, CompoundOr].each do |handler|
+          post_output, post_input, success =
+            CompoundAnd.process(input, output, **args)
+
+          return post_output, post_input, success if success
+        end
+
+        [output, input, false]
       end
     end
   end
