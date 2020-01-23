@@ -1,0 +1,29 @@
+require 'pry'
+require 'table_print'
+
+# Require all custom matchers contained within spec/matchers.
+project_root = File.dirname(File.absolute_path(__FILE__))
+Dir.glob(project_root + '/matchers/*', &method(:require))
+
+# Shared configurations for all spec types
+RSpec.configure do |config|
+  # Allow rspec --only-failures on a retry attempt
+  config.example_status_persistence_file_path = '.example_status'
+
+  # Find our 10 slowest examples
+  config.profile_examples = true
+
+  config.order = 'random'
+
+  config.raise_errors_for_deprecations!
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_doubled_constant_names = true
+  end
+end
+
+# Requires supporting ruby files with custom matchers and macros, etc
+# in spec/support/ and its subdirectories.
+#Dir[Rails.root.join('spec', 'features', 'support', '**', '*.rb')].each { |f| require f }
+#Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+#Dir[File.expand_path(File.join('spec', 'fakers', '**', '*.rb'))].each {|f| require f}

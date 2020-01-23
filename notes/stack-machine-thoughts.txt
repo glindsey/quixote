@@ -1,0 +1,69 @@
+# What we need is a stack machine
+
+"You put the red ball and the blue block in the corner."
+
+## English Parts of Speech
+
+noun, pronoun, verb, adjective, adverb, preposition, conjunction, and interjection
+
+## Push `Sentence` onto the state stack
+    Sentence
+        - can be:
+            + Statement
+            + Question
+            + ...
+
+### Input stack
+    'you' 'put' 'the' 'red' 'ball' 'and' 'the' 'blue' 'block' in' 'the' 'corner'
+
+### Output stack
+    nil
+
+## Push `Statement` onto state stack
+    Sentence > Statement
+        - possible starts to statement are:
+            + Subject
+
+I/O stacks unchanged
+
+## Push `Subject` onto state stack
+    Sentence > Statement > Subject
+        - possible subjects are:
+            + SubjNounClause
+            + SubjNounPrepPhrase - prepositional phrase used as a noun
+
+I/O stacks unchanged
+
+## Push `SubjNounClause` onto state stack
+    Sentence > Statement > Subject > SubjNounClause
+        - possible starts to subject clauses are:
+            + PersonalSubjPronoun
+            + DemonstrativePronounClause
+            + IndefinitePronounClause
+            + PossessivePronounClause
+            + DefiniteNoun
+            + IndefiniteNoun
+            + ProperNoun
+
+I/O stacks unchanged
+
+## Push `PersonalSubjPronoun` onto state stack
+    Sentence > Statement > Subject > SubjNounClause > PersonalSubjPronoun
+        - Check if input stack is in `he she I you we they (etc.)`
+        - Wrap top data stack member in [PersonalSubjPronoun] onto data stack
+
+### Input stack
+    PersonalSubjPronoun('you') 'put' 'the' 'red' 'ball' 'and' 'the' 'blue' 'block' 'in' 'the' 'corner'
+
+### Output stack
+    nil
+
+## Pop `PersonalSubjPronoun` from state stack
+    Sentence > Statement > Subject > SubjNounClause
+        - replacement was done, so:
+            Wrap top data stack member in [SubjNounClause]
+
+### Data stack
+    SubjNounClause(PersonalSubjPronoun('you')) 'put' 'the' 'red' 'ball' 'and' 'the' 'blue' 'block' 'in' 'the' 'corner'
+
+## Pop ``

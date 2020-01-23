@@ -1,0 +1,250 @@
+# A Very Simple Example
+
+Example phrase: "The ball is blue."
+
+## Lexer
+
+We assume that the lexer is able to convert this into the following:
+
+`["The", "ball", "is", "blue", Punct::Period]`
+
+## Syntax Parser: Non-Contextual
+
+The first step is to non-contextually classify the words in the sentence into parts of speech and punctuation, using simple dictionary lookups. Stepping through each element, we get:
+
+* _The_ -- Article, definite.
+* _ball_ -- Can be a singular noun, but can also be a verb ("You ball up the piece of paper.")
+* _is_ -- Verb, present tense.
+* _blue_ -- Can be an adjective, but can also be a singular noun ("Into the blue")
+
+At this stage we know nothing of syntactical context, so we consider all possibilities for each word. This makes our data:
+
+    [
+      [Article(definite: true)], 
+      [Noun('ball', proper: false, plural: false), Verb('ball')], 
+      [Verb('be', tense: :present)], 
+      [Adjective('blue'), Noun('blue', proper: false, plural: false)], 
+      [Punct::Period]
+    ]`
+
+## Syntax Parser: Contextual Phase 1
+
+Now it gets tougher. Starting with the first word in the phrase, we start walking through the sentence to try and make sense of it:
+
+* `Article(definite: true)` -- Can be followed by a noun, adjective (modifying a noun), or adverb (modifying an adjective).
+    - `Verb('ball')` does not fit those criteria, so we discard that possibility.
+    - `Noun('ball', proper: false, plural: false)` fits those criteria, so we move on with that.
+* `Noun('ball', proper: false, plural: false)` -- Can be followed by an adverb (modifying a future verb), a conjunction, a preposition, a comma (representing a list conjunction), or a verb.
+    - `Verb('be', tense: :present)` fits, so we proceed.
+* `Verb('be', tense: :present)` can be followed by an article, a pronoun, a proper noun, a gerund, an adjective, an adverb, a preposition, or clause-ending punctuation (comma, period, etc.).
+    - `Adjective('blue')` fits.
+    - `Noun('blue', proper: false)` does not, so we discard it.
+* `Adjective('blue')` can be followed by a conjunction, another adjective, a comma, a noun, a preposition, or clause-ending punctuation.
+    - `Punct::Period` qualifies.
+
+So, at the end of this procedure we've narrowed it down to:
+
+    [
+      [Article(definite: true)], 
+      [Noun('ball', proper: false, plural: false)], 
+      [Verb('be', tense: :present)], 
+      [Adjective('blue')], 
+      [Punct::Period]
+    ]
+
+## Syntax Parser: Phase 2 Transformer Loop
+
+The next phase is to run through the following transformers, to modify the data until running a full iteration of the loop does not change the data (or until we enter an oscillating state that we have to break out of).
+
+### Transformer: Compounds
+
+Compounds basically group together objects of the same type.
+
+* Pattern: `C(1) [Comma C(n)]* [Comma]? [x: And|Or] C(z)`, where each C represents an object of the same class (for example, all Nouns, Verbs, NounClauses, etc.) 
+    + Becomes: `CCompound(x, [X1, Xn, ...Xz])`
+
+#### Special Cases
+
+* Compound adjectives may omit commas and/or the conjunction itself (which is assumed to be 'and'), if _and only if_ they follow the adjective order rules of "Quantity, Quality/Opinion, [Relative Location], Size, Age, Shape, Color, Proper adjective (nationality/place of origin/material), Purpose". e.g. "a nice, new house" or "a sparkly red dress".
+
+* Compound adverbs may omit the conjunction, but not the commas. (e.g. "lazily, dreamily walked")
+
+* Full sentences follow very different rules, which will be covered later.
+
+#### Our Example
+
+We have no compounds in our simple example, so nothing happens.
+
+#### Other Examples
+
+'red dog and bird' (Adj, Noun, Conj, Noun)
+    - Becomes `Adj('red'), NounCompound('and', [Noun('dog'), Noun('bird')])`
+
+'red dog and black bird' (Adj, Noun, Conj, Adj, Noun)
+    - Does nothing so far, since nothing matches the pattern. The data must pass through the `NounClause` transformer before this one will do anything.
+
+'red dog and black bird' (after transforming into NounClause, Conj, NounClause)
+    - Becomes `NounClauseCompound('and', [NounClause('dog', [Adj('red')]), NounClause('bird', [Adj('black')])])`
+
+'red and black bird' (Adj, Conj, Adj, Noun)
+    - Becomes `AdjCompound('and', [Adj('red'), Adj('black')]), Noun('bird')`
+
+### Transformer: NounQualifier
+
+Processes nouns and articles to determine whether they are singular/plural, and whether they are proper/definite/indefinite.
+
+* Pattern: `Art('the') [x: Noun*]`
+    + Becomes: `[x]`, with the `type` property set to `:definite`
+
+* Pattern: `Art('a'|'an') [x: Noun*, plural: false]` (because 'a birds' makes no sense whatsoever)
+    + Becomes: `[x]`, with the `type` property set to `:indefinite`
+
+* Pattern: `[x: Noun*, plural: true]`
+    + Becomes: `[x]`, with the `type` property set to `:indefinite`
+
+#### Our Example
+
+The article is parsed so our data becomes:
+
+    [
+      [Noun('ball', proper: false, plural: false, type: :definite)], 
+      [Verb('be', tense: :present)], 
+      [Adjective('blue')], 
+      [Punct::Period]
+    ]
+
+### Transformer: AdverbMover
+
+Moves adverbs that are before verbs to be after them instead ("slowly walked" -> "walked slowly"). This makes creating adverb clauses down the line much easier.
+
+* Pattern: `[x: Adv*] [y: Verb]`
+    + Becomes: `[y] [x]`
+
+#### Our Example
+
+We have no adverbs in our simple example, so nothing happens.
+
+### Transformer: CompoundCompounder
+
+Combines adjacent `Compound` objects of the same subtype and conjunction.
+
+* Pattern: `CCompound([x: And|Or], [C1...]) [CCompound(x, [Cn...])]*`
+    + Becomes: `CCompound(x, [C1...Cn...])`
+
+#### Our Example
+
+We have no compounds in our simple example, so nothing happens.
+
+### Transformer: AdjClause
+
+Adjective clauses mean adjectives that are modified by adverbs, e.g. "deeply tired".
+
+* Pattern: `[x: Adv*] [y: Adj]`
+    + Becomes: `AdjClause(y, x)`
+
+#### Our Example
+
+We have no adverbs in our simple example, so nothing happens.
+
+### Transformer: PrepPhrase
+
+Ah, prepositional phrases. So... fun. 
+* Pattern: `[x: Prep] [y: Noun*(type: !unqualified)]`
+    + Becomes: `PrepPhrase(x, y)`
+* Pattern: `[x: Prep] [y: Verb*(type: !unqualified)]`
+    + Becomes: `PrepPhrase(x, y)`
+
+- Adjectival phrase - modifies a noun
+- Adverbial phrase - modifies a verb
+- Noun phrase - acts as a noun
+
+#### Our Example
+
+There are no prepositions in our example, so nothing happens.
+
+### Transformer: NounClause
+
+Noun clauses mean nouns that are modified by adjectives ("brown trousers") and/or prepositional clauses ("birds that fly").
+
+* Pattern: `[x: Adj*] [y: Noun(type: :unqualified])` (because you don't want stuff like "nice the earrings" to be acceptable)
+    + Becomes: `NounClause(y, x)`
+* TODO: Deal with the nightmare that is English prepositions
+
+#### Our Example
+
+There are no prepositions in our example, and the one adjective in our example does not modify the noun directly, so nothing happens.
+
+### Transformer: VerbClause
+
+Verb clauses mean verbs that are modified by adverbs ("ran swiftly") and/or prepositional clauses ("swim over there").
+
+* Pattern: `[x: Verb] [y: Adv*|PrepClause]+`
+    + Becomes: `VerbClause(x, y...)`
+
+#### Our Example
+
+There are no prepositions or adverbs in our example, so nothing happens.
+
+## So Far
+
+After all that, the results of our simple example so far are:
+
+    [
+      [Noun('ball', proper: false, plural: false, type: :definite)], 
+      [Verb('be', tense: :present)], 
+      [Adjective('blue')], 
+      [Punct::Period]
+    ]
+
+===
+
+'red dog and bird' -> Adjective Noun Conjunction Noun
+
+
+    
+    Adjective(
+        'red', 
+        Compound(
+            'and', 
+            Noun('dog'), 
+            Noun('bird')
+        )
+    )
+
+'red dog and black bird' -> Adjective Noun Conjunction Adjective Noun
+
+    Compound(
+        'and', 
+        NounClause(
+            'dog', 
+            Adjective('red')
+        ), 
+        NounClause(
+            'bird', 
+            Adjective('black')
+        )
+    )
+
+'red and black bird' -> Adjective Conjunction Adjective Noun
+
+    NounClause(
+        'bird',
+        Compound(
+            'and',
+            Adjective('red'),
+            Adjective('black')
+        )
+    )
+
+
+
+
+e.g. 'happily married'
+
+We run a scan looking for 
+Next, we try to transform the data into larger elements, using a process similar to above.
+
+`priorElements, nextElements = element.parse(priorElements, nextElements)`
+
+* `Article(definite: true).parse([], ...)`
+    - 
