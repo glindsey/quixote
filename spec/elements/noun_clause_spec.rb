@@ -17,34 +17,39 @@ RSpec.describe Elements::NounClause do
     end
 
     def do_dummy_succeed(for_class, passing_string, args)
-      if args[:input].first == passing_string
+      top_of_input_stack = args[:input].first
+      if top_of_input_stack == passing_string
+        args[:input].shift
         Elements::Element.succeed(
-          input: input.shift,
-          output: args[:output].push(for_class.new),
-          **args
+          input: args[:input],
+          output: [for_class.new]
         )
       else
-        Elements::Element.fail(input: input, output: output, **args)
+        Elements::Element.fail(input: args[:input])
       end
     end
 
     before do
-      allow(Elements::Adjective).to receive(:process) do |args|
-        do_dummy_succeed(Elements::Adjective, 'Adjective', args)
+      allow(Elements::Compound).to receive(:process) do |args|
+        subclass = args[:subclass]
+        do_dummy_succeed(subclass, subclass.to_s.split('::')[1], args)
       end
 
-      allow(Elements::PluralNoun).to receive(:process) do |args|
-        do_dummy_succeed(Elements::PluralNoun, 'PluralNoun', args)
-      end
+      # allow(Elements::Adjective).to receive(:process) do |args|
+      #   do_dummy_succeed(Elements::Adjective, 'Adjective', args)
+      # end
 
-      allow(Elements::PrepAdjectivalPhrase).to receive(:process) do |args|
-        do_dummy_succeed(Elements::PrepAdjectivalPhrase, 'PrepAdjPhr', args)
-      end
+      # allow(Elements::PluralNoun).to receive(:process) do |args|
+      #   do_dummy_succeed(Elements::PluralNoun, 'PluralNoun', args)
+      # end
 
-      allow(Elements::SingularNoun).to receive(:process) do |args|
-        do_dummy_succeed(Elements::SingularNoun, 'SingularNoun', args)
-      end
+      # allow(Elements::PrepAdjectivalPhrase).to receive(:process) do |args|
+      #   do_dummy_succeed(Elements::PrepAdjectivalPhrase, 'PrepAdjPhr', args)
+      # end
 
+      # allow(Elements::SingularNoun).to receive(:process) do |args|
+      #   do_dummy_succeed(Elements::SingularNoun, 'SingularNoun', args)
+      # end
     end
 
     context 'valid clauses' do
@@ -62,7 +67,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -78,7 +83,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the SingularNoun PrepAdjPhr' do
-        let(:input) { ['the', 'SingularNoun', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'SingularNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -91,7 +96,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -108,7 +113,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the SingularNoun PrepAdjPhr PrepAdjPhr' do
-        let(:input) { ['the', 'SingularNoun', 'PrepAdjPhr', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'SingularNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -121,7 +126,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -151,7 +156,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -164,17 +169,10 @@ RSpec.describe Elements::NounClause do
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
-
-        it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
-          phrases = result.adjective_phrases
-          expect(phrases).to include(Elements::PrepAdjectivalPhrase)
-          expect(phrases.length).to eq(2)
-        end
       end
 
       context 'the PluralNoun PrepAdjPhr' do
-        let(:input) { ['the', 'PluralNoun', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'PluralNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -187,7 +185,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -204,7 +202,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun PrepAdjPhr PrepAdjPhr' do
-        let(:input) { ['the', 'PluralNoun', 'PrepAdjPhr', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'PluralNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -217,7 +215,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -247,7 +245,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -263,7 +261,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective SingularNoun PrepAdjPhr' do
-        let(:input) { ['the', 'Adjective', 'SingularNoun', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -276,7 +274,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -306,7 +304,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -322,7 +320,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective PluralNoun PrepAdjPhr' do
-        let(:input) { ['the', 'Adjective', 'PluralNoun', 'PrepAdjPhr'] }
+        let(:input) { ['the', 'Adjective', 'PluralNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -335,7 +333,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -365,7 +363,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -381,7 +379,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an Adjective SingularNoun PrepAdjPhr' do
-        let(:input) { ['a', 'Adjective', 'SingularNoun', 'PrepAdjPhr'] }
+        let(:input) { ['a', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -394,7 +392,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -424,7 +422,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -440,7 +438,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an SingularNoun PrepAdjPhr' do
-        let(:input) { ['a', 'SingularNoun', 'PrepAdjPhr'] }
+        let(:input) { ['a', 'SingularNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -453,7 +451,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::SingularNoun)
+          expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
@@ -483,7 +481,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -499,7 +497,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'Adjective PluralNoun PrepAdjPhr' do
-        let(:input) { ['Adjective', 'PluralNoun', 'PrepAdjPhr'] }
+        let(:input) { ['Adjective', 'PluralNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -512,7 +510,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
@@ -542,7 +540,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjective_phrases blank' do
@@ -553,7 +551,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'PluralNoun PrepAdjPhr' do
-        let(:input) { ['PluralNoun', 'PrepAdjPhr'] }
+        let(:input) { ['PluralNoun', 'PrepAdjectivalPhrase'] }
 
         it 'does not raise an exception' do
           expect { process(input, output) }.not_to raise_error
@@ -566,7 +564,7 @@ RSpec.describe Elements::NounClause do
 
         it 'sets result.noun to the provided noun' do
           result = process(input, output)[:output].first
-          expect(result.noun).to be_a(Elements::PluralNoun)
+          expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do

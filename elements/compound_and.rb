@@ -25,7 +25,7 @@ module Elements
       # Process I/O stacks. Returns hash containing input/output/success keys.
       # Requires 'subclass' to be passed in, which specifies what item you are
       # looking for as a possible compound item.
-      def _process(input:, output: [], **args)
+      def _process(input:, **args)
 
         unless args.key?(:subclass)
           raise ArgumentError, "Args has must contain `:subclass`"
@@ -36,25 +36,24 @@ module Elements
 
         result = run_machine(
           start_state: :item_1,
-          end_states: [:success_not_compound, :success_compound, :failed],
-          input: input,
-          output: output,
-          args: args
+          pass_states: [:success_not_compound, :success_compound],
+          fail_states: [:failed],
+          input: input, **args
         )
 
+        output = nil
         case result[:state]
         when :success_not_compound
           input = result[:input]
-          output.push(result[:output])
+          output = result[:output]
         when :success_compound
           input = result[:input]
-          output.push(CompoundAnd.new(elements: result[:output]))
+          output = CompoundAnd.new(elements: result[:output])
         when :failed
-          return fail(input: input, output: output, **args)
+          return fail(input: input)
         end
 
-        args.merge(result[:args]) if result.key?(:args)
-        succeed(input: input, output: output, **args)
+        succeed(input: input, output: [output])
       end
 
       private
@@ -62,14 +61,14 @@ module Elements
       # States for this processor
       # Each returns the output stack, the input stack, and the new state
 
-      def item_1(input:, output:, args: {})
-        result = args[:subclass].process(input: input, output: output, **args)
+      def item_1(input:, state_info:, args: {})
+        result = args[:subclass].process(input: input, **args)
         return result.merge({ state: :failed }) if result.failed
 
         result.merge({ state: :delimiter_1 })
       end
 
-      def delimiter_1(input:, output:, args: {})
+      def delimiter_1(input:, state_info:, args: {})
         state = nil
 
         case input.first
@@ -83,15 +82,15 @@ module Elements
           state = :success_not_compound
         end
 
-        { input: input, output: output, state: state, args: args }
+        { input: input, state: state, args: args }
       end
 
-      def item_2(input:, output:, args: {})
-        result = args[:subclass].process(input: input, output: output, **args)
+      def item_2(input:, state_info:, args: {})
+        result = args[:subclass].process(input: input, **args)
         result.merge({ state: result.succeeded ? :delimiter_n : :failed })
       end
 
-      def delimiter_n(input:, output:, args: {})
+      def delimiter_n(input:, state_info:, args: {})
         state = nil
         case input.first
         when ','
@@ -104,29 +103,29 @@ module Elements
           state = :failed
         end
 
-        { input: input, output: output, state: state, args: args }
+        { input: input, state: state, args: args }
       end
 
-      def item_n(input:, output:, args: {})
+      def item_n(input:, state_info:, args: {})
         if input.first == 'and'
           input.shift
-          return { input: input, output: output, state: :item_l, args: args }
+          return { input: input, state: :item_l, args: args }
         end
 
-        result = args[:subclass].process(input: input, output: output, **args)
+        result = args[:subclass].process(input: input, **args)
         result.merge({ state: result.succeeded ? :delimiter_n : :failed })
       end
 
-      def item_l(input:, output:, args: {})
+      def item_l(input:, state_info:, args: {})
         if input.first == 'and'
           input.shift
-          return { input: input, output: output, state: :failed, args: args }
+          return { input: input, state: :failed, args: args }
         end
 
-        result = args[:subclass].process(input: input, output: output, **args)
-        return result.merge({state: :failed}) if result.failed
+        result = args[:subclass].process(input: input, **args)
+        return result.merge({ state: :failed }) if result.failed
 
-        { input: input, output: output, state: :success_compound, args: args }
+        { input: input, state: :success_compound, args: args }
       end
     end
   end

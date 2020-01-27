@@ -46,44 +46,43 @@ module Elements
       ]
 
       # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, output: [], **args)
+      def _process(input:, **args)
 
         result = run_machine(
           start_state: :start,
-          end_states: [:failed, :succeeded],
-          input: input,
-          output: output,
-          args: args
+          pass_states: [:succeeded],
+          fail_states: [:failed],
+          input: input, **args
         )
 
+        output = nil
         case result[:state]
         when :succeeded
-          # TODO: PUT STUFF WE FIGURED OUT HERE
           input = result[:input]
-          output.push(
-            NounClause.new(
-              noun: result[:noun],
-              adjectives: result[:adjectives],
-              phrases: result[:phrases]
-            )
-          )
+          output = [NounClause.new(
+            noun: result[:noun] || [],
+            adjectives: result[:adjectives] || [],
+            phrases: result[:phrases] || []
+          )]
         when :failed
-          return fail(input: input, output: output, **args)
+          return fail(input: input)
         end
 
-        succeed(input: input, output: output, **args)
+        succeed(input: input, output: output)
       end
 
-      def start(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: Adjective, **args)
-        return result.merge(state: :indef_p_noun) if result.succeeded
+      def start(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: Adjective, **args)
+        if result.succeeded
+          result[:state] = :indef_p_noun
+          result.save_adjectives(state_info)
+          return result
+        end
 
-        result = Compound.process(input: input, output: output,
-                                  subclass: PluralNoun, **args)
+        result = Compound.process(input: input, subclass: PluralNoun, **args)
         if result.succeeded
           result[:state] = :indef_p_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
@@ -98,129 +97,142 @@ module Elements
           state = :failed
         end
 
-        { input: input, output: output, state: state, args: args }
+        { input: input, state: state, args: args }
       end
 
-      def def_adj(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: Adjective, **args)
-        return result.merge(state: :def_noun) if result.succeeded
-
-        result = Compound.process(input: input, output: output,
-                                  subclass: SingularNoun, **args)
+      def def_adj(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: Adjective, **args)
         if result.succeeded
-          result[:state] = :def_adj_phr
-          result[:noun] = result[:output]
+          result[:state] = :def_noun
+          result.save_adjectives(state_info)
           return result
         end
 
-        result = Compound.process(input: input, output: output,
-                                  subclass: PluralNoun, **args)
-
+        result = Compound.process(input: input, subclass: SingularNoun, **args)
         if result.succeeded
           result[:state] = :def_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
+          return result
+        end
+
+        result = Compound.process(input: input, subclass: PluralNoun, **args)
+        if result.succeeded
+          result[:state] = :def_adj_phr
+          result.save_nouns(state_info)
           return result
         end
 
         # Fail on anything else
-        { input: input, output: output, state: :failed, args: args }
+        { input: input, state: :failed, args: args }
       end
 
-      def def_noun(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: SingularNoun, **args)
+      def def_noun(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: SingularNoun, **args)
 
         if result.succeeded
           result[:state] = :def_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
-        result = Compound.process(input: input, output: output,
-                                  subclass: PluralNoun, **args)
+        result = Compound.process(input: input, subclass: PluralNoun, **args)
 
         if result.succeeded
           result[:state] = :def_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
         # Fail on anything else
-        { input: input, output: output, state: :failed, args: args }
+        { input: input, state: :failed, args: args }
       end
 
-      def def_adj_phr(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: PrepAdjectivalPhrase, **args)
-        return result.merge(state: :def_adj_phr) if result.succeeded
+      def def_adj_phr(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+                                  **args)
+        if result.succeeded
+          result[:state] = :def_adj_phr
+          result.save_phrases(state_info)
+          return result
+        end
 
         # Succeed on anything else
-        { input: input, output: output, state: :succeeded, args: args }
+        { input: input, state: :succeeded, args: args }
       end
 
-      def indef_p_noun(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: PluralNoun, **args)
+      def indef_p_noun(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: PluralNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_p_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
         # Fail on anything else
-        { input: input, output: output, state: :failed, args: args }
+        { input: input, state: :failed, args: args }
       end
 
-      def indef_p_adj_phr(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: PrepAdjectivalPhrase, **args)
-        return result.merge(state: :indef_p_adj_phr) if result.succeeded
+      def indef_p_adj_phr(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+                                  **args)
+
+        if result.succeeded
+          result[:state] = :indef_p_adj_phr
+          result.save_phrases(state_info)
+          return result
+        end
 
         # Succeed on anything else
-        { input: input, output: output, state: :succeeded, args: args }
+        { input: input, state: :succeeded, args: args }
       end
 
-      def indef_s_adj(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: Adjective, **args)
-        return result.merge(state: :indef_s_noun) if result.succeeded
+      def indef_s_adj(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: Adjective, **args)
 
-        result = Compound.process(input: input, output: output,
-                                  subclass: SingularNoun, **args)
+        if result.succeeded
+          result[:state] = :indef_s_noun
+          result.save_adjectives(state_info)
+          return result
+        end
+
+        result = Compound.process(input: input, subclass: SingularNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_s_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
         # Fail on anything else
-        { input: input, output: output, state: :failed, args: args }
+        { input: input, state: :failed, args: args }
       end
 
-      def indef_s_noun(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: SingularNoun, **args)
+      def indef_s_noun(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: SingularNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_s_adj_phr
-          result[:noun] = result[:output]
+          result.save_nouns(state_info)
           return result
         end
 
         # Fail on anything else
-        { input: input, output: output, state: :failed, args: args }
+        { input: input, state: :failed, args: args }
       end
 
-      def indef_s_adj_phr(input:, output:, args: {})
-        result = Compound.process(input: input, output: output,
-                                  subclass: PrepAdjectivalPhrase, **args)
-        return result.merge(state: :indef_s_adj_phr) if result.succeeded
+      def indef_s_adj_phr(input:, state_info:, args: {})
+        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+                                  **args)
+
+        if result.succeeded
+          result[:state] = :indef_s_adj_phr
+          result.save_phrases(state_info)
+          return result
+        end
 
         # Succeed on anything else
-        { input: input, output: output, state: :succeeded, args: args }
+        { input: input, state: :succeeded, args: args }
       end
     end
 

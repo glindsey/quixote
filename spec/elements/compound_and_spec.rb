@@ -7,12 +7,8 @@ RSpec.describe Elements::CompoundAnd do
   describe '.process' do
     let(:output) { [] }
 
-    def process(input, output)
-      described_class.process(
-        input: input,
-        output: output,
-        subclass: Elements::Dummy
-      )
+    def process(input)
+      described_class.process(input: input, subclass: Elements::Dummy)
     end
 
     context 'valid statements' do
@@ -20,12 +16,12 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['dummy'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'returns the expected result' do
-          result = process(input, output)
-
+          result = process(input)
+          warn "result = #{result}"
           expect(result[:success]).to eq(true)
           expect(result[:output].length).to eq(1)
         end
@@ -35,11 +31,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', 'and', 'B'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'returns the expected result' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(true)
           expect(result[:output].length).to eq(1)
@@ -50,11 +46,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B', 'and', 'C' ] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'returns the expected result' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(true)
           expect(result[:output].length).to eq(1)
@@ -65,11 +61,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B', ',', 'and', 'C' ] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'returns the expected result' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(true)
           expect(result[:output].length).to eq(1)
@@ -82,11 +78,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ','] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)
@@ -98,11 +94,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', 'and'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)
@@ -114,11 +110,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)
@@ -130,11 +126,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B', ','] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)
@@ -146,11 +142,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B', 'and'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)
@@ -162,11 +158,11 @@ RSpec.describe Elements::CompoundAnd do
         let(:input) { ['A', ',', 'B', ',', 'and'] }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(input) }.not_to raise_error
         end
 
         it 'does not change the I/O stacks' do
-          result = process(input, output)
+          result = process(input)
 
           expect(result[:success]).to eq(false)
           expect(result[:input]).to eq(input)

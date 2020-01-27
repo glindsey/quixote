@@ -10,12 +10,9 @@ module Elements
   class Compound < Element
     class << self
       # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, output: [], **args)
+      def _process(input:, **args)
         # Try parsing as either a compound 'and' or a compound 'or'.
-        try(
-          handlers: [CompoundAnd, CompoundOr],
-          input: input, output: output, **args
-        )
+        try(handlers: [CompoundAnd, CompoundOr], input: input, **args)
       end
     end
   end

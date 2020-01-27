@@ -1,42 +1,59 @@
 module Mixins
   module StateMachine
-    STATE_TRACING = false
+    STATE_TRACING = true
 
-    def run_machine(start_state:, end_states:, input:, output: [], args:)
-      state_input = input
-      state_output = output
+    # Runs the state machine.
+    def run_machine(start_state:, pass_states:, fail_states:, input:, **args)
+      args.delete(:output)
+
+      state_input = input.dup
       state = start_state
-      state_args = args
+      state_info = {}
 
-      until end_states.include?(state)
+      until pass_states.include?(state) || fail_states.include?(state)
         if STATE_TRACING
-          warn "**** #{name} state #{state} BEGIN: " \
-               "input = #{state_input}, output = #{state_output}"
+          warn "**** #{name} state #{state}: " \
+               "input = #{state_input}, " \
+               "info = #{state_info}"
         end
 
         result = send(state,
                       input: state_input,
-                      output: state_output,
-                      args: state_args)
+                      state_info: state_info,
+                      args: args)
 
         if STATE_TRACING
           warn "**** #{name} state #{state} END: " \
-               "input = #{result[:input]}, output = #{result[:output]}, " \
-               "new state = #{result[:state]}"
+               "result = #{result}"
         end
 
         state = result[:state]
         state_input = result[:input]
-        state_output = result[:output]
-        state_args.merge(result[:args]) if result.key?(:args)
+
+        result.delete(:state)
+        result.delete(:input)
+
+        state_info.merge!(result)
       end
 
-      {
-        state: state,
-        input: state_input,
-        output: state_output,
-        args: state_args
-      }
+      output = state_info[:output]
+      state_info.delete(:output)
+
+      if pass_states.include?(state)
+        {
+          success: true,
+          state: state,
+          input: state_input,
+          output: output
+        }.merge(state_info).tap { |res| warn "****** PASS: #{res}" }
+      else
+        {
+          success: false,
+          state: state,
+          input: input,
+          output: nil
+        }.merge(state_info).tap { |res| warn "****** FAIL: #{res}" }
+      end
     end
   end
 end

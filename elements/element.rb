@@ -15,7 +15,7 @@ module Elements
       using Refinements::ResultHashes
 
       # Process I/O stacks. Returns hash containing input/output/success keys.
-      def process(input:, output: [], **args)
+      def process(input:, **args)
         if SANITY_CHECKS
           unless input.is_a?(Array)
             raise ArgumentError, "Input stack must be an Array"
@@ -25,24 +25,15 @@ module Elements
           end
         end
 
-        unless output.is_a?(Array)
-          warn "#{self.name}.process: output stack provided is not an Array; " \
-               "clearing"
-          args[:output] = []
-        end
-
         if self.respond_to?(:_process)
           if DEBUG_TRACING
-            warn "** BEGIN #{self.name}.process **\n" \
-                 "input = #{input}, output = #{output}, args = #{args}"
+            warn "-- #{self.name}: Processing " \
+                 "input = #{input}, args = #{args}"
           end
 
-          result = _process(input: input.dup, output: output.dup, **args)
+          result = _process(input: input.dup, **args)
 
-          if DEBUG_TRACING
-            warn "**   END #{self.name}.process **\n" \
-                 "input = #{result[:input]}, output = #{result[:output]}"
-          end
+          warn "-- #{self.name}: Results = #{result}" if DEBUG_TRACING
 
           result
         else
@@ -53,29 +44,31 @@ module Elements
       # Try several different handlers, and go with the first one that works.
       # This may be augmented at a later time to try multiple handlers
       # simultaneously via multithreading.
-      def try(handlers:, input:, output: [], **args)
+      def try(handlers:, input:, **args)
+
         handlers.each do |handler|
-          result = handler.process(input: input, output: output, **args)
+          warn "-- #{self.name}: Trying #{handler}" if DEBUG_TRACING
+
+          result = handler.process(input: input, **args)
 
           return result if result.succeeded
         end
 
-        fail("No handler in #{handlers} succeeded in parsing",
-             input: input, output: output, **args)
+        fail("No handler in #{handlers} succeeded in parsing", input: input)
       end
 
       # Return a standard failure result, with an optional message.
-      def fail(message = '', input:, output: [], **args)
+      def fail(message = '', input:)
         {
           input: input,
-          output: output,
+          output: [],
           success: false,
           message: message
         }
       end
 
       # Return a standard success result.
-      def succeed(input:, output: [], **args)
+      def succeed(input:, output: [])
         {
           input: input,
           output: output,
@@ -89,8 +82,8 @@ module Elements
       @args = args
     end
 
-    def inspect
-      "#{self.class.name}: args = #{@args}"
-    end
+    # def inspect
+    #   "#{self.class.name}: args = #{@args}"
+    # end
   end
 end

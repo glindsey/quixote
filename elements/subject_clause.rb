@@ -15,10 +15,10 @@ module Elements
   class SubjectClause < Element
     class << self
       # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, output: [], **args)
+      def _process(input:, **args)
         # Try each of them in order.
         try(handlers: [NounClause, PronounClause, GerundClause, PrepNounPhrase],
-            input: input, output: output, **args)
+            input: input, **args)
       end
     end
   end
