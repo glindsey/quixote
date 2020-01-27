@@ -8,7 +8,11 @@ RSpec.describe Elements::CompoundAnd do
     let(:output) { [] }
 
     def process(input, output)
-      described_class.process(input, output, subclass: Elements::Dummy)
+      described_class.process(
+        input: input.dup,
+        output: output.dup,
+        subclass: Elements::Dummy
+      )
     end
 
     context 'valid statements' do
@@ -20,10 +24,10 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'returns the expected result' do
-          post_output, post_input, success = process(input, output)
+          result = process(input, output)
 
-          expect(success).to eq(true)
-          expect(post_output.length).to eq(1)
+          expect(result[:success]).to eq(true)
+          expect(result[:output].length).to eq(1)
         end
       end
 
@@ -35,10 +39,10 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'returns the expected result' do
-          post_output, post_input, success = process(input, output)
+          result = process(input, output)
 
-          expect(success).to eq(true)
-          expect(post_output.length).to eq(1)
+          expect(result[:success]).to eq(true)
+          expect(result[:output].length).to eq(1)
         end
       end
 
@@ -50,10 +54,10 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'returns the expected result' do
-          post_output, post_input, success = process(input, output)
+          result = process(input, output)
 
-          expect(success).to eq(true)
-          expect(post_output.length).to eq(1)
+          expect(result[:success]).to eq(true)
+          expect(result[:output].length).to eq(1)
         end
       end
 
@@ -65,10 +69,10 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'returns the expected result' do
-          post_output, post_input, success = process(input, output)
+          result = process(input, output)
 
-          expect(success).to eq(true)
-          expect(post_output.length).to eq(1)
+          expect(result[:success]).to eq(true)
+          expect(result[:output].length).to eq(1)
         end
       end
     end # valid statements
@@ -82,14 +86,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
 
@@ -101,14 +102,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
 
@@ -120,14 +118,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
 
@@ -139,14 +134,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
 
@@ -158,14 +150,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
 
@@ -177,14 +166,11 @@ RSpec.describe Elements::CompoundAnd do
         end
 
         it 'does not change the I/O stacks' do
-          pre_input = input.dup
-          pre_output = output.dup
+          result = process(input, output)
 
-          post_output, post_input, success = process(input, output)
-
-          expect(success).to eq(false)
-          expect(post_input).to eq(pre_input)
-          expect(post_output).to eq(pre_output)
+          expect(result[:success]).to eq(false)
+          expect(result[:input]).to eq(input)
+          expect(result[:output]).to eq(output)
         end
       end
     end

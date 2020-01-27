@@ -15,16 +15,10 @@ module Elements
   class SubjectClause < Element
     class << self
       # Process the I/O stacks. Returns output, input, success.
-      def process(input, output, **args)
+      def _process(input:, output: [], **args)
         # Try each of them in order.
-        [NounClause, PronounClause, GerundClause, PrepNounPhrase].each do |handler|
-          post_output, post_input, success =
-            handler.process(input, output, **args)
-
-          return post_output, post_input, success if success
-        end
-
-        [output, input, false]
+        try(handlers: [NounClause, PronounClause, GerundClause, PrepNounPhrase],
+            input: input, output: output, **args)
       end
     end
   end

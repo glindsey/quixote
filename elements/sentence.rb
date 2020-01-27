@@ -7,16 +7,11 @@ module Elements
   class Sentence < Element
     class << self
       # Process the I/O stacks. Returns output, input, success.
-      def process(input, output, **args)
-        # A sentence can be a Statement or a Question. Let's try each.
-        [Statement, Question].each do |handler|
-          post_output, post_input, success =
-            handler.process(input, output, **args)
-
-          return post_output, post_input, success if success
-        end
-
-        [output, input, false]
+      def _process(input:, output: [], **args)
+        # A sentence can be a Statement, a Question, or a Command.
+        # Let's try each.
+        try(handlers: [Statement, Question, Command],
+            input: input, output: output, **args)
       end
     end
   end

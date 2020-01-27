@@ -26,8 +26,8 @@ module Elements
   class NounClause < Element
     class << self
       # Process the I/O stacks. Returns output, input, success.
-      def process(input, output, **args)
-        raise NotImplementedError, 'Not yet implemented'
+      def _process(input:, output: [], **args)
+        fail("#{self.class} has not yet been implemented", **args)
       end
     end
   end
