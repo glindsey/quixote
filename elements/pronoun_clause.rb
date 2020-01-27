@@ -3,8 +3,8 @@
 require_relative 'element'
 
 module Elements
-  # Processor for commands.
-  class Command < Element
+  # Processor for pronoun clauses.
+  class PronounClause < Element
     extend Mixins::UnimplementedElement
   end
 end

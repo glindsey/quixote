@@ -1,0 +1,44 @@
+digraph G
+{
+  //rankdir = LR;
+
+  node [
+    style = filled;
+  ]
+
+  "Start" [fillcolor=yellow, shape=circle, penwidth=3];
+  "Fail" [fillcolor=red, shape=circle, penwidth=3];
+  "Pass" [fillcolor=lightgreen, shape=circle, penwidth=3];
+
+  "Start" -> "Def-Adj" [label="the"];
+  "Start" -> "IndefS-Adj" [label="a|an"];
+  "Start" -> "IndefP-Noun" [label="CompoundAdjective"];
+  "Start" -> "IndefP-AdjPhr" [label="PluralNoun"];
+  "Start" -> "Fail" [label="(other)"];
+
+  "Def-Adj" -> "Def-Noun" [label="CompoundAdjective"];
+  "Def-Adj" -> "Def-AdjPhr"  [label="SingularNoun\nPluralNoun"];
+  "Def-Adj" -> "Fail" [label="(other)"];
+
+  "Def-Noun" -> "Def-AdjPhr" [label="SingularNoun\nPluralNoun"];
+  "Def-Noun" -> "Fail" [label="(other)"];
+
+  "Def-AdjPhr" -> "Def-AdjPhr" [label="PrepAdjectivalPhrase"];
+  "Def-AdjPhr" -> "Pass" [label="(other)"];
+
+  "IndefS-Adj" -> "IndefS-Noun" [label="CompoundAdjective"];
+  "IndefS-Adj" -> "IndefS-AdjPhr" [label="SingularNoun"];
+  "IndefS-Adj" -> "Fail" [label="(other)"];
+
+  "IndefS-Noun" -> "IndefS-AdjPhr" [label="SingularNoun"];
+  "IndefS-Noun" -> "Fail" [label="(other)"];
+
+  "IndefS-AdjPhr" -> "IndefS-AdjPhr" [label="PrepAdjectivalPhrase"];
+  "IndefS-AdjPhr" -> "Pass" [label="(other)"];
+
+  "IndefP-Noun" -> "IndefP-AdjPhr" [label="PluralNoun"];
+  "IndefP-Noun" -> "Fail" [label="(other)"];
+
+  "IndefP-AdjPhr" -> "IndefP-AdjPhr" [label="PrepAdjectivalPhrase"];
+  "IndefP-AdjPhr" -> "Pass" [label="(other)"];
+}

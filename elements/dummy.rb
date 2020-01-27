@@ -6,7 +6,7 @@ module Elements
   # Dummy element used for testing.
   class Dummy < Element
     class << self
-      # Process the I/O stacks. Returns output, input, success.
+      # Process I/O stacks. Returns hash containing input/output/success keys.
       # This dummy element just shifts the first element off of the input stack,
       # wraps it in a `Dummy` class, and pushes it onto the output stack.
       def _process(input:, output: [], **args)

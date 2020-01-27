@@ -14,7 +14,7 @@ module Elements
   # Processor for subject clauses.
   class SubjectClause < Element
     class << self
-      # Process the I/O stacks. Returns output, input, success.
+      # Process I/O stacks. Returns hash containing input/output/success keys.
       def _process(input:, output: [], **args)
         # Try each of them in order.
         try(handlers: [NounClause, PronounClause, GerundClause, PrepNounPhrase],

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../mixins/unimplemented_element'
 require_relative '../refinements/result_hashes'
 
 module Elements
@@ -13,7 +14,7 @@ module Elements
     class << self
       using Refinements::ResultHashes
 
-      # Process the I/O stacks. Returns output, input, success.
+      # Process I/O stacks. Returns hash containing input/output/success keys.
       def process(input:, output: [], **args)
         if SANITY_CHECKS
           unless input.is_a?(Array)
@@ -59,7 +60,7 @@ module Elements
           return result if result.succeeded
         end
 
-        fail("No handler in #{handler_list} succeeded in parsing",
+        fail("No handler in #{handlers} succeeded in parsing",
              input: input, output: output, **args)
       end
 

@@ -3,8 +3,8 @@
 require_relative 'element'
 
 module Elements
-  # Processor for commands.
-  class Command < Element
+  # Processor for compound-OR clauses.
+  class CompoundOr < Element
     extend Mixins::UnimplementedElement
   end
 end

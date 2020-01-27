@@ -3,8 +3,8 @@
 require_relative 'element'
 
 module Elements
-  # Processor for commands.
-  class Command < Element
+  # Processor for plural nouns.
+  class PluralNoun < Element
     extend Mixins::UnimplementedElement
   end
 end

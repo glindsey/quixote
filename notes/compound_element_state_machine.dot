@@ -1,0 +1,31 @@
+digraph G
+{
+  node [
+    style = filled;
+  ]
+
+  "Start" [fillcolor=yellow, shape=circle, penwidth=3];
+  "Fail" [fillcolor=red, shape=circle, penwidth=3];
+  "PassNC" [label="Pass\n(not compound)", fillcolor=lightgreen, penwidth=3];
+  "PassC" [label="Pass\n(compound)", fillcolor=lightgreen, penwidth=3];
+
+  "Start" -> "FirstDelim" [label="ELEMENT"];
+
+  "FirstDelim" -> "LastItem" [label="\"and\""];
+  "FirstDelim" -> "SecondItem" [label="Comma"];
+  "FirstDelim" -> "PassNC" [label="(other)"];
+
+  "SecondItem" -> "NthDelim" [label="ELEMENT"];
+  "SecondItem" -> "Fail" [label="(other)"];
+
+  "NthDelim" -> "LastItem" [label="\"and\""];
+  "NthDelim" -> "NthItem" [label="Comma"];
+  "NthDelim" -> "Fail" [label="(other)"];
+
+  "NthItem" -> "LastItem" [label="\"and\""];
+  "NthItem" -> "NthDelim" [label="ELEMENT"];
+  "NthItem" -> "Fail" [label="(other)"];
+
+  "LastItem" -> "PassC" [label="ELEMENT"];
+  "LastItem" -> "Fail" [label="(other)"];
+}

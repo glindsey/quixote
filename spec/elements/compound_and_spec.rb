@@ -9,8 +9,8 @@ RSpec.describe Elements::CompoundAnd do
 
     def process(input, output)
       described_class.process(
-        input: input.dup,
-        output: output.dup,
+        input: input,
+        output: output,
         subclass: Elements::Dummy
       )
     end
