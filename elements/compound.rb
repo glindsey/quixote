@@ -9,10 +9,10 @@ module Elements
   # Processor for compound items (and/or).
   class Compound < Element
     class << self
-      # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, **args)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      def _process(tape:, **args)
         # Try parsing as either a compound 'and' or a compound 'or'.
-        try(handlers: [CompoundAnd, CompoundOr], input: input, **args)
+        try(handlers: [CompoundAnd, CompoundOr], tape: tape, **args)
       end
     end
   end
