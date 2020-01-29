@@ -7,6 +7,7 @@ require_relative 'compound'
 require_relative 'prep_adjectival_phrase'
 require_relative 'plural_noun'
 require_relative '../mixins/state_machine'
+require_relative '../structures/tape'
 
 # Noun Clauses
 # =============
@@ -45,98 +46,77 @@ module Elements
         :succeeded
       ]
 
-      # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, **args)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      def _process(tape:, **args)
 
         result = run_machine(
           start_state: :start,
           pass_states: [:succeeded],
           fail_states: [:failed],
-          input: input, **args
+          tape: tape, **args
         )
 
         output = nil
         case result[:state]
         when :succeeded
-          input = result[:input]
+          tape = result[:tape]
           output = [NounClause.new(
             noun: result[:noun] || [],
             adjectives: result[:adjectives] || [],
             phrases: result[:phrases] || []
           )]
         when :failed
-          return fail(input: input)
+          return fail(tape: tape)
         end
 
-        succeed(input: input, output: output)
+        succeed(tape: tape, output: output)
       end
 
-      def start(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: Adjective, **args)
+      def start(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: Adjective, **args)
         if result.succeeded
           result[:state] = :indef_p_noun
           result.save_adjectives(state_info)
           return result
         end
 
-        result = Compound.process(input: input, subclass: PluralNoun, **args)
+        result = Compound.process(tape: tape, subclass: PluralNoun, **args)
         if result.succeeded
           result[:state] = :indef_p_adj_phr
           result.save_nouns(state_info)
           return result
         end
 
-        case input.first
+        case tape.element
         when 'the'
-          input.shift
+          tape.next
           state = :def_adj
         when 'a', 'an'
-          input.shift
+          tape.next
           state = :indef_s_adj
         else
           state = :failed
         end
 
-        { input: input, state: state, args: args }
+        { tape: tape, state: state, args: args }
       end
 
-      def def_adj(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: Adjective, **args)
+      def def_adj(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: Adjective, **args)
         if result.succeeded
           result[:state] = :def_noun
           result.save_adjectives(state_info)
           return result
         end
 
-        result = Compound.process(input: input, subclass: SingularNoun, **args)
+        result = Compound.process(tape: tape, subclass: SingularNoun, **args)
         if result.succeeded
           result[:state] = :def_adj_phr
           result.save_nouns(state_info)
           return result
         end
 
-        result = Compound.process(input: input, subclass: PluralNoun, **args)
-        if result.succeeded
-          result[:state] = :def_adj_phr
-          result.save_nouns(state_info)
-          return result
-        end
-
-        # Fail on anything else
-        { input: input, state: :failed, args: args }
-      end
-
-      def def_noun(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: SingularNoun, **args)
-
-        if result.succeeded
-          result[:state] = :def_adj_phr
-          result.save_nouns(state_info)
-          return result
-        end
-
-        result = Compound.process(input: input, subclass: PluralNoun, **args)
-
+        result = Compound.process(tape: tape, subclass: PluralNoun, **args)
         if result.succeeded
           result[:state] = :def_adj_phr
           result.save_nouns(state_info)
@@ -144,11 +124,32 @@ module Elements
         end
 
         # Fail on anything else
-        { input: input, state: :failed, args: args }
+        { tape: tape, state: :failed, args: args }
       end
 
-      def def_adj_phr(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+      def def_noun(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: SingularNoun, **args)
+
+        if result.succeeded
+          result[:state] = :def_adj_phr
+          result.save_nouns(state_info)
+          return result
+        end
+
+        result = Compound.process(tape: tape, subclass: PluralNoun, **args)
+
+        if result.succeeded
+          result[:state] = :def_adj_phr
+          result.save_nouns(state_info)
+          return result
+        end
+
+        # Fail on anything else
+        { tape: tape, state: :failed, args: args }
+      end
+
+      def def_adj_phr(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: PrepAdjectivalPhrase,
                                   **args)
         if result.succeeded
           result[:state] = :def_adj_phr
@@ -157,11 +158,11 @@ module Elements
         end
 
         # Succeed on anything else
-        { input: input, state: :succeeded, args: args }
+        { tape: tape, state: :succeeded, args: args }
       end
 
-      def indef_p_noun(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: PluralNoun, **args)
+      def indef_p_noun(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: PluralNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_p_adj_phr
@@ -170,11 +171,11 @@ module Elements
         end
 
         # Fail on anything else
-        { input: input, state: :failed, args: args }
+        { tape: tape, state: :failed, args: args }
       end
 
-      def indef_p_adj_phr(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+      def indef_p_adj_phr(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: PrepAdjectivalPhrase,
                                   **args)
 
         if result.succeeded
@@ -184,11 +185,11 @@ module Elements
         end
 
         # Succeed on anything else
-        { input: input, state: :succeeded, args: args }
+        { tape: tape, state: :succeeded, args: args }
       end
 
-      def indef_s_adj(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: Adjective, **args)
+      def indef_s_adj(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: Adjective, **args)
 
         if result.succeeded
           result[:state] = :indef_s_noun
@@ -196,7 +197,7 @@ module Elements
           return result
         end
 
-        result = Compound.process(input: input, subclass: SingularNoun, **args)
+        result = Compound.process(tape: tape, subclass: SingularNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_s_adj_phr
@@ -205,11 +206,11 @@ module Elements
         end
 
         # Fail on anything else
-        { input: input, state: :failed, args: args }
+        { tape: tape, state: :failed, args: args }
       end
 
-      def indef_s_noun(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: SingularNoun, **args)
+      def indef_s_noun(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: SingularNoun, **args)
 
         if result.succeeded
           result[:state] = :indef_s_adj_phr
@@ -218,11 +219,11 @@ module Elements
         end
 
         # Fail on anything else
-        { input: input, state: :failed, args: args }
+        { tape: tape, state: :failed, args: args }
       end
 
-      def indef_s_adj_phr(input:, state_info:, args: {})
-        result = Compound.process(input: input, subclass: PrepAdjectivalPhrase,
+      def indef_s_adj_phr(tape:, state_info:, args: {})
+        result = Compound.process(tape: tape, subclass: PrepAdjectivalPhrase,
                                   **args)
 
         if result.succeeded
@@ -232,7 +233,7 @@ module Elements
         end
 
         # Succeed on anything else
-        { input: input, state: :succeeded, args: args }
+        { tape: tape, state: :succeeded, args: args }
       end
     end
 

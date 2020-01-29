@@ -3,9 +3,9 @@
 module Mixins
   # Dummy mixin for elements that have not yet been implemented.
   module UnimplementedElement
-    # Process the I/O stacks. Returns hash containing input/output/success keys.
-    def _process(input:, output: [], **args)
-      fail("#{self.class} has not yet been implemented", input: input)
+    # Process the I/O stacks. Returns hash containing tape, success keys.
+    def _process(tape:, output: [], **args)
+      fail("#{self.class} has not yet been implemented", tape: tape)
     end
   end
 end

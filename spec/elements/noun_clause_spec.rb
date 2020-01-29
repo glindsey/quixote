@@ -4,6 +4,7 @@ require_relative '../../elements/noun_clause'
 
 require_relative '../../elements/element'
 require_relative '../../elements/singular_noun'
+require_relative '../../structures/tape'
 
 RSpec.describe Elements::NounClause do
   describe '.process' do
@@ -11,21 +12,21 @@ RSpec.describe Elements::NounClause do
 
     def process(input, output)
       described_class.process(
-        input: input,
+        tape: Tape.new(input),
         output: output
       )
     end
 
     def do_dummy_succeed(for_class, passing_string, args)
-      top_of_input_stack = args[:input].first
+      top_of_input_stack = args[:tape].element
       if top_of_input_stack == passing_string
-        args[:input].shift
+        args[:tape].next
         Elements::Element.succeed(
-          input: args[:input],
+          tape: args[:tape],
           output: [for_class.new]
         )
       else
-        Elements::Element.fail(input: args[:input])
+        Elements::Element.fail(tape: args[:tape])
       end
     end
 

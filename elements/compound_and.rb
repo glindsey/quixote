@@ -2,6 +2,7 @@
 
 require_relative 'element'
 require_relative '../mixins/state_machine'
+require_relative '../structures/tape'
 
 # A and B
 # A, B and C
@@ -17,15 +18,21 @@ require_relative '../mixins/state_machine'
 
 module Elements
   # Processor for compound items.
+  # TODO: Flag for when the final "and" can be omitted. For example, it's okay
+  #       to say "the clean, shiny ball" instead of "the clean and shiny ball",
+  #       but it's not okay to say "the ball is clean, shiny".
+  # TODO: Likewise, flag for when it's okay to omit commas entirely, as in
+  #       "the shiny red ball". (In this case, the "and" should *never* be
+  #       present.)
   class CompoundAnd < Element
     extend Mixins::StateMachine
     using Refinements::ResultHashes
 
     class << self
-      # Process I/O stacks. Returns hash containing input/output/success keys.
+      # Process I/O stacks. Returns hash containing tape, success keys.
       # Requires 'subclass' to be passed in, which specifies what item you are
       # looking for as a possible compound item.
-      def _process(input:, **args)
+      def _process(tape:, **args)
 
         unless args.key?(:subclass)
           raise ArgumentError, "Args has must contain `:subclass`"
@@ -38,94 +45,94 @@ module Elements
           start_state: :item_1,
           pass_states: [:success_not_compound, :success_compound],
           fail_states: [:failed],
-          input: input, **args
+          tape: tape, **args
         )
 
         output = nil
         case result[:state]
         when :success_not_compound
-          input = result[:input]
+          tape = result[:tape]
           output = result[:output]
         when :success_compound
-          input = result[:input]
+          tape = result[:tape]
           output = CompoundAnd.new(elements: result[:output])
         when :failed
-          return fail(input: input)
+          return fail(tape: tape)
         end
 
-        succeed(input: input, output: [output])
+        succeed(tape: tape, output: [output])
       end
 
       private
 
       # States for this processor
-      # Each returns the output stack, the input stack, and the new state
+      # Each returns the tape, the output stack, and the new state
 
-      def item_1(input:, state_info:, args: {})
-        result = args[:subclass].process(input: input, **args)
+      def item_1(tape:, state_info:, args: {})
+        result = args[:subclass].process(tape: tape, **args)
         return result.merge({ state: :failed }) if result.failed
 
         result.merge({ state: :delimiter_1 })
       end
 
-      def delimiter_1(input:, state_info:, args: {})
+      def delimiter_1(tape:, state_info:, args: {})
         state = nil
 
-        case input.first
+        case tape.element
         when ','
-          input.shift
+          tape.next
           state = :item_2
         when 'and'
-          input.shift
+          tape.next
           state = :item_l
         else
           state = :success_not_compound
         end
 
-        { input: input, state: state, args: args }
+        { tape: tape, state: state, args: args }
       end
 
-      def item_2(input:, state_info:, args: {})
-        result = args[:subclass].process(input: input, **args)
+      def item_2(tape:, state_info:, args: {})
+        result = args[:subclass].process(tape: tape, **args)
         result.merge({ state: result.succeeded ? :delimiter_n : :failed })
       end
 
-      def delimiter_n(input:, state_info:, args: {})
+      def delimiter_n(tape:, state_info:, args: {})
         state = nil
-        case input.first
+        case tape.element
         when ','
-          input.shift
+          tape.next
           state = :item_n
         when 'and'
-          input.shift
+          tape.next
           state = :item_l
         else
           state = :failed
         end
 
-        { input: input, state: state, args: args }
+        { tape: tape, state: state, args: args }
       end
 
-      def item_n(input:, state_info:, args: {})
-        if input.first == 'and'
-          input.shift
-          return { input: input, state: :item_l, args: args }
+      def item_n(tape:, state_info:, args: {})
+        if tape.element == 'and'
+          tape.next
+          return { tape: tape, state: :item_l, args: args }
         end
 
-        result = args[:subclass].process(input: input, **args)
+        result = args[:subclass].process(tape: tape, **args)
         result.merge({ state: result.succeeded ? :delimiter_n : :failed })
       end
 
-      def item_l(input:, state_info:, args: {})
-        if input.first == 'and'
-          input.shift
-          return { input: input, state: :failed, args: args }
+      def item_l(tape:, state_info:, args: {})
+        if tape.element == 'and'
+          tape.next
+          return { tape: tape, state: :failed, args: args }
         end
 
-        result = args[:subclass].process(input: input, **args)
+        result = args[:subclass].process(tape: tape, **args)
         return result.merge({ state: :failed }) if result.failed
 
-        { input: input, state: :success_compound, args: args }
+        { tape: tape, state: :success_compound, args: args }
       end
     end
   end

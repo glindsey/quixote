@@ -2,6 +2,7 @@
 
 require_relative '../mixins/unimplemented_element'
 require_relative '../refinements/result_hashes'
+require_relative '../structures/tape'
 
 module Elements
   attr_reader :args
@@ -14,11 +15,11 @@ module Elements
     class << self
       using Refinements::ResultHashes
 
-      # Process I/O stacks. Returns hash containing input/output/success keys.
-      def process(input:, **args)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      def process(tape:, **args)
         if SANITY_CHECKS
-          unless input.is_a?(Array)
-            raise ArgumentError, "Input stack must be an Array"
+          unless tape.is_a?(Tape)
+            raise ArgumentError, "`tape` must be a Tape object"
           end
           unless args.is_a?(Hash)
             raise ArgumentError, "Args must be a Hash"
@@ -28,10 +29,10 @@ module Elements
         if self.respond_to?(:_process)
           if DEBUG_TRACING
             warn "-- #{self.name}: Processing " \
-                 "input = #{input}, args = #{args}"
+                 "tape = #{tape}, args = #{args}"
           end
 
-          result = _process(input: input.dup, **args)
+          result = _process(tape: tape.dup, **args)
 
           warn "-- #{self.name}: Results = #{result}" if DEBUG_TRACING
 
@@ -44,23 +45,23 @@ module Elements
       # Try several different handlers, and go with the first one that works.
       # This may be augmented at a later time to try multiple handlers
       # simultaneously via multithreading.
-      def try(handlers:, input:, **args)
+      def try(handlers:, tape:, **args)
 
         handlers.each do |handler|
           warn "-- #{self.name}: Trying #{handler}" if DEBUG_TRACING
 
-          result = handler.process(input: input, **args)
+          result = handler.process(tape: tape, **args)
 
           return result if result.succeeded
         end
 
-        fail("No handler in #{handlers} succeeded in parsing", input: input)
+        fail("No handler in #{handlers} succeeded in parsing", tape: tape)
       end
 
       # Return a standard failure result, with an optional message.
-      def fail(message = '', input:)
+      def fail(message = '', tape:)
         {
-          input: input,
+          tape: tape,
           output: [],
           success: false,
           message: message
@@ -68,9 +69,9 @@ module Elements
       end
 
       # Return a standard success result.
-      def succeed(input:, output: [])
+      def succeed(tape:, output: [])
         {
-          input: input,
+          tape: tape,
           output: output,
           success: true
         }

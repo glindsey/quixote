@@ -14,11 +14,11 @@ module Elements
   # Processor for subject clauses.
   class SubjectClause < Element
     class << self
-      # Process I/O stacks. Returns hash containing input/output/success keys.
-      def _process(input:, **args)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      def _process(tape:, **args)
         # Try each of them in order.
         try(handlers: [NounClause, PronounClause, GerundClause, PrepNounPhrase],
-            input: input, **args)
+            tape: tape, **args)
       end
     end
   end

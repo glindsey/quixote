@@ -3,22 +3,22 @@ module Mixins
     STATE_TRACING = true
 
     # Runs the state machine.
-    def run_machine(start_state:, pass_states:, fail_states:, input:, **args)
+    def run_machine(start_state:, pass_states:, fail_states:, tape:, **args)
       args.delete(:output)
 
-      state_input = input.dup
+      state_tape = tape.dup
       state = start_state
       state_info = {}
 
       until pass_states.include?(state) || fail_states.include?(state)
         if STATE_TRACING
           warn "**** #{name} state #{state}: " \
-               "input = #{state_input}, " \
+               "tape = #{state_tape}, " \
                "info = #{state_info}"
         end
 
         result = send(state,
-                      input: state_input,
+                      tape: state_tape,
                       state_info: state_info,
                       args: args)
 
@@ -28,10 +28,10 @@ module Mixins
         end
 
         state = result[:state]
-        state_input = result[:input]
+        state_tape = result[:tape]
 
         result.delete(:state)
-        result.delete(:input)
+        result.delete(:tape)
 
         state_info.merge!(result)
       end
@@ -43,14 +43,14 @@ module Mixins
         {
           success: true,
           state: state,
-          input: state_input,
+          tape: state_tape,
           output: output
         }.merge(state_info).tap { |res| warn "****** PASS: #{res}" }
       else
         {
           success: false,
           state: state,
-          input: input,
+          tape: tape,
           output: nil
         }.merge(state_info).tap { |res| warn "****** FAIL: #{res}" }
       end

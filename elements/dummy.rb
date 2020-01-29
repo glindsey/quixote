@@ -1,26 +1,30 @@
 # frozen_string_literal: true
 
 require_relative 'element'
+require_relative '../structures/tape'
 
 module Elements
   # Dummy element used for testing.
   class Dummy < Element
     class << self
-      # Process I/O stacks. Returns hash containing input/output/success keys.
-      # This dummy element just shifts the first element off of the input stack,
-      # wraps it in a `Dummy` class, and pushes it onto the output stack.
-      def _process(input:, **args)
-        if input.nil? || input.empty?
-          return fail("No input stack", input: input)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      # This dummy element just takes the current tape element,
+      # wraps it in a `Dummy` class, pushes it onto the output stack, and then
+      # advances the tape.
+      def _process(tape:, **args)
+        if tape.nil?
+          return fail("No tape provided", tape: tape)
         end
 
-        element = input.first
+        element = tape.element
         if element.nil?
-          return fail("First element of input stack is nil", input: input)
+          return fail("Tape element is nil", tape: tape)
         end
 
-        input.shift
-        succeed(input: input, output: Dummy.new(element: element))
+        tape.next
+        succeed(tape: tape, output: Dummy.new(element: element))
+      rescue EndOfTapeError
+        fail('Reached the end of the tape', tape: tape)
       end
     end
   end

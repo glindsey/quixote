@@ -1,0 +1,83 @@
+# Dealing with Prepositional Phrase Ambiguity
+
+## The Problem
+
+Take this simple sentence:
+
+    "The boy kicks the ball on the table in the basket."
+
+With the current way the parser works (as of commit `2305efd`), this would become:
+
+    | The boy | kicks  | the ball | on the table | in the basket |
+    | Noun    | Verb   | Noun     | PrepAdjPhr   | PrepAdjPhr    |
+    +---------+--------+----------+--------------+---------------+
+    | NounCls |        | NounClause                              |
+    +---------+        +-----------------------------------------+
+    | SubjCls | VerbCl | ObjectClause                            |
+    +---------+--------+-----------------------------------------+
+    | Statement                                                  |
+    +------------------------------------------------------------+
+
+Of course, this is incorrect. It *should* be:
+
+    | The boy | kicks  | the ball | on the table | in the basket |
+    | Noun    | Verb   | Noun     | PrepAdjPhr   | PrepAdvPhr    |
+    +---------+--------+----------+--------------+---------------+
+    |         |        | NounClause              |               | 
+    |         |        |~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~|               |
+    | SubjCls | VerbClause                                       |
+    +---------+--------+~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~+---------------+
+    | SubjCls | VerbCl | ObjectClause            |
+    +---------+--------+-------------------------+
+    | Statement                                  |
+    +--------------------------------------------+
+
+Hard to diagram, but basically the adverbial phrase "in the basket" *moves over* and becomes part of the verb clause.
+
+The problem is that the current state machine in the `NounClause` processor sees "in the basket" as just another adjectival clause, because it can be. It doesn't know that the "kick" verb is waiting for an adverbial clause for it to be complete.
+
+## Possible Solutions
+
+### Verb Hinting
+
+In this solution, the `VerbClause` parser sets a flag telling the future `ObjectClause` parser that it is expecting to be "completed" with an adverbial clause. When the `ObjectClause` parser reaches the end of the prepositional phrases, it knows to "roll back" one for the `VerbClause` parser to use.
+
+Problems: as currently laid out, by the time the `ObjectClause` parser is running, the `VerbClause` parser is *done*. Also, `kick` does not necessarily need an adverbial clause.
+
+### Multiple Paths
+
+The most complicated solution, but the most flexible one. This solution allows all processors and states to potentially return an `Ambiguity` object when the result of the parsing could potentially be more than one outcome. The `Ambiguity` is basically a set of possible states to pursue.
+
+For example: above, the `NounClause` state looking for the first `PrepAdjPhr` sees "on the table", and notes that this could either be a `PrepAdjPhr` *or* a `PrepAdvPhr`. So it returns an `Ambiguity` with two possibilities, one where success is false and one where it is true. Then both of those possible paths in the state machine are traversed to see where they lead, etc.
+
+Problems: adding `Ambiguity` handling to processors isn't actually so bad, but adding it to the state machines would be a total fucking nightmare and would require a serious refactor of how I have them laid out.
+
+### Hybrid Solution
+
+This solution allows for `Ambiguity` results from processors, but not in state machines. In this case, the `VerbClause` parser gets the `Verb` "place", and sees that one definition expects an adverbial phrase, and another doesn't. So it tries both: `TransitiveVerbClause` and `IntransitiveVerbClause`. (Note: might be more complicated than this, obviously.) 
+
+The transitive one parses the sentence to mean: 
+    "The boy (subject clause) / kicks in the basket (transitive verb clause) / the ball on the table (object clause)"
+
+The intransitive one parses it to mean:
+    "The boy (subject clause) / kicks (intransitive verb clause) / the ball on the table in the basket (object clause)"
+
+The intransitive solution makes no semantic sense, but syntactically it is valid, so they are both returned as ambiguous syntactical parsings of the sentence.
+
+Note that this still requires a little shifting around of processors. The object must now go beneath the verb clause processors, since the transitive parser would have to use the "hinting" of solution 1 to let the object parser know that it is still expecting an adverbial phrase. The transitive parsing path ends up looking like this:
+
+    | The boy | kicks  | the ball | on the table | in the basket |
+    | Noun    |        | Noun     | PrepAdjPhr   |               |
+    +---------+        +----------+--------------+               +
+    | NounCls |        | NounClause              |               |
+    +---------+        +-------------------------+               +
+    |         | TrVerb | ObjectClause            | PrepAdvPhr    |
+    |         +--------+-------------------------+---------------+
+    |         | TransitiveVerbObjectClause                       |
+    |         +--------------------------------------------------+
+    | SubjCls | VerbObjectClause                                 |
+    +---------+--------------------------------------------------+
+    | Statement                                                  |
+    +------------------------------------------------------------+
+
+It works. It's slightly unwieldy, but it works.

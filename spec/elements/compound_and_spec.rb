@@ -2,13 +2,14 @@
 
 require_relative '../../elements/compound_and'
 require_relative '../../elements/dummy'
+require_relative '../../structures/tape'
 
 RSpec.describe Elements::CompoundAnd do
   describe '.process' do
     let(:output) { [] }
 
     def process(input)
-      described_class.process(input: input, subclass: Elements::Dummy)
+      described_class.process(tape: Tape.new(input), subclass: Elements::Dummy)
     end
 
     context 'valid statements' do
@@ -81,11 +82,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
@@ -97,11 +108,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
@@ -113,11 +134,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
@@ -129,11 +160,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
@@ -145,11 +186,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
@@ -161,11 +212,21 @@ RSpec.describe Elements::CompoundAnd do
           expect { process(input) }.not_to raise_error
         end
 
-        it 'does not change the I/O stacks' do
+        it 'returns a failure' do
           result = process(input)
 
           expect(result[:success]).to eq(false)
-          expect(result[:input]).to eq(input)
+        end
+
+        it 'does not alter the tape' do
+          result = process(input)
+
+          expect(result[:tape].data).to eq(input)
+        end
+
+        it 'does not alter the output stack' do
+          result = process(input)
+
           expect(result[:output]).to eq(output)
         end
       end
