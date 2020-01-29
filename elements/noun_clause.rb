@@ -60,11 +60,11 @@ module Elements
         case result[:state]
         when :succeeded
           tape = result[:tape]
-          output = [NounClause.new(
+          output = NounClause.new(
             noun: result[:noun] || [],
             adjectives: result[:adjectives] || [],
             phrases: result[:phrases] || []
-          )]
+          )
         when :failed
           return fail(tape: tape)
         end

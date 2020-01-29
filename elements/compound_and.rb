@@ -60,7 +60,7 @@ module Elements
           return fail(tape: tape)
         end
 
-        succeed(tape: tape, output: [output])
+        succeed(tape: tape, output: output)
       end
 
       private

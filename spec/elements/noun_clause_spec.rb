@@ -10,11 +10,8 @@ RSpec.describe Elements::NounClause do
   describe '.process' do
     let(:output) { [] }
 
-    def process(input, output)
-      described_class.process(
-        tape: Tape.new(input),
-        output: output
-      )
+    def process(tape, **args)
+      described_class.process(tape: tape, **args)
     end
 
     def do_dummy_succeed(for_class, passing_string, args)
@@ -23,7 +20,7 @@ RSpec.describe Elements::NounClause do
         args[:tape].next
         Elements::Element.succeed(
           tape: args[:tape],
-          output: [for_class.new]
+          output: for_class.new
         )
       else
         Elements::Element.fail(tape: args[:tape])
@@ -55,58 +52,58 @@ RSpec.describe Elements::NounClause do
 
     context 'valid clauses' do
       context 'the SingularNoun' do
-        let(:input) { ['the', 'SingularNoun'] }
+        let(:tape) { Tape.new(['the', 'SingularNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'the SingularNoun PrepAdjPhr' do
-        let(:input) { ['the', 'SingularNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -114,29 +111,29 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the SingularNoun PrepAdjPhr PrepAdjPhr' do
-        let(:input) { ['the', 'SingularNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(2)
@@ -144,58 +141,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun' do
-        let(:input) { ['the', 'PluralNoun'] }
+        let(:tape) { Tape.new(['the', 'PluralNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'the PluralNoun PrepAdjPhr' do
-        let(:input) { ['the', 'PluralNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -203,29 +200,29 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun PrepAdjPhr PrepAdjPhr' do
-        let(:input) { ['the', 'PluralNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(2)
@@ -233,58 +230,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective SingularNoun' do
-        let(:input) { ['the', 'Adjective', 'SingularNoun'] }
+        let(:tape) { Tape.new(['the', 'Adjective', 'SingularNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'the Adjective SingularNoun PrepAdjPhr' do
-        let(:input) { ['the', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -292,58 +289,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective PluralNoun' do
-        let(:input) { ['the', 'Adjective', 'PluralNoun'] }
+        let(:tape) { Tape.new(['the', 'Adjective', 'PluralNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'the Adjective PluralNoun PrepAdjPhr' do
-        let(:input) { ['the', 'Adjective', 'PluralNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['the', 'Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -351,58 +348,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an Adjective SingularNoun' do
-        let(:input) { ['a', 'Adjective', 'SingularNoun'] }
+        let(:tape) { Tape.new(['a', 'Adjective', 'SingularNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'a|an Adjective SingularNoun PrepAdjPhr' do
-        let(:input) { ['a', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['a', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -410,58 +407,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an SingularNoun' do
-        let(:input) { ['a', 'SingularNoun'] }
+        let(:tape) { Tape.new(['a', 'SingularNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'a|an SingularNoun PrepAdjPhr' do
-        let(:input) { ['a', 'SingularNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['a', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::SingularNoun)
         end
 
         it 'keeps result.adjectives blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to be_empty
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -469,58 +466,58 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'Adjective PluralNoun' do
-        let(:input) { ['Adjective', 'PluralNoun'] }
+        let(:tape) { Tape.new(['Adjective', 'PluralNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'Adjective PluralNoun PrepAdjPhr' do
-        let(:input) { ['Adjective', 'PluralNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjectives to the provided adjective' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.adjectives).to include(Elements::Adjective)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)
@@ -528,48 +525,48 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'PluralNoun' do
-        let(:input) { ['PluralNoun'] }
+        let(:tape) { Tape.new(['PluralNoun']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'keeps result.adjective_phrases blank' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to be_empty
         end
       end
 
       context 'PluralNoun PrepAdjPhr' do
-        let(:input) { ['PluralNoun', 'PrepAdjectivalPhrase'] }
+        let(:tape) { Tape.new(['PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
-          expect { process(input, output) }.not_to raise_error
+          expect { process(tape) }.not_to raise_error
         end
 
         it 'returns a NounClause' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result).to be_a(Elements::NounClause)
         end
 
         it 'sets result.noun to the provided noun' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           expect(result.noun).to include(Elements::PluralNoun)
         end
 
         it 'sets result.adjective_phrases to the provided phrases' do
-          result = process(input, output)[:output].first
+          result = process(tape)[:output]
           phrases = result.adjective_phrases
           expect(phrases).to include(Elements::PrepAdjectivalPhrase)
           expect(phrases.length).to eq(1)

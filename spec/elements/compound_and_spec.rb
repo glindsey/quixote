@@ -6,7 +6,7 @@ require_relative '../../structures/tape'
 
 RSpec.describe Elements::CompoundAnd do
   describe '.process' do
-    let(:output) { [] }
+    let(:output) { nil }
 
     def process(tape, **args)
       described_class.process(tape: tape, subclass: Elements::Dummy, **args)
@@ -24,8 +24,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape)
           warn "result = #{result}"
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::Dummy)
+          expect(result[:output]).to be_a(Elements::Dummy)
         end
       end
 
@@ -40,8 +39,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
 
@@ -56,8 +54,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
 
@@ -72,8 +69,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
     end # valid statements
@@ -150,8 +146,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape, args)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
 
@@ -166,8 +161,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape, args)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
     end
@@ -201,8 +195,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape, args)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::Dummy)
+          expect(result[:output]).to be_a(Elements::Dummy)
         end
       end
     end
@@ -221,8 +214,7 @@ RSpec.describe Elements::CompoundAnd do
           result = process(tape, args)
 
           expect(result[:success]).to eq(true)
-          expect(result[:output].length).to eq(1)
-          expect(result[:output].first).to be_a(Elements::CompoundAnd)
+          expect(result[:output]).to be_a(Elements::CompoundAnd)
         end
       end
     end

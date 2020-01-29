@@ -58,18 +58,38 @@ module Elements
         fail("No handler in #{handlers} succeeded in parsing", tape: tape)
       end
 
+      # Try several handlers in order. The results of the handlers are
+      # collected into an array in the output.
+      def in_order(handlers:, tape:, **args)
+        original_tape = tape
+        output = []
+
+        handlers.each do |handler|
+          result = handler.process(tape: tape, **args)
+
+          if result.failed
+            return fail(tape: original_tape)
+          end
+
+          tape = result[:tape]
+          output.push(result[:output])
+        end
+
+        success(tape: tape, output: output)
+      end
+
       # Return a standard failure result, with an optional message.
       def fail(message = '', tape:)
         {
           tape: tape,
-          output: [],
+          output: nil,
           success: false,
           message: message
         }
       end
 
       # Return a standard success result.
-      def succeed(tape:, output: [])
+      def succeed(tape:, output: nil)
         {
           tape: tape,
           output: output,
