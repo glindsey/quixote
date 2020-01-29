@@ -13,14 +13,19 @@ digraph G
 
   "FirstDelim" -> "LastItem" [label="\"and\""];
   "FirstDelim" -> "SecondItem" [label="Comma"];
+  "FirstDelim" -> "NthSpacedItem" [label="ELEMENT\nallow_space_delim = true"];
   "FirstDelim" -> "PassNC" [label="(other)"];
 
   "SecondItem" -> "NthDelim" [label="ELEMENT"];
   "SecondItem" -> "Fail" [label="(other)"];
 
+  "NthSpacedItem" -> "NthSpacedItem" [label="ELEMENT"];
+  "NthSpacedItem" -> "PassC" [label="(other)"];
+
   "NthDelim" -> "LastItem" [label="\"and\""];
   "NthDelim" -> "NthItem" [label="Comma"];
-  "NthDelim" -> "Fail" [label="(other)"];
+  "NthDelim" -> "PassC" [label="(other)\nallow_commas_only = true"];
+  "NthDelim" -> "Fail" [label="(other)\nallow_commas_only = false"];
 
   "NthItem" -> "LastItem" [label="\"and\""];
   "NthItem" -> "NthDelim" [label="ELEMENT"];
@@ -28,4 +33,14 @@ digraph G
 
   "LastItem" -> "PassC" [label="ELEMENT"];
   "LastItem" -> "Fail" [label="(other)"];
+
+  subgraph "to be added" {
+    node [
+      style = "filled,dashed";
+    ]
+
+    edge [
+      style = dashed;
+    ]
+  }
 }

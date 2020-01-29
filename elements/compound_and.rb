@@ -76,6 +76,11 @@ module Elements
       end
 
       def delimiter_1(tape:, state_info:, args: {})
+        if args[:allow_space_delimiters]
+          result = args[:subclass].process(tape: tape, **args)
+          return result.merge({ state: :item_spaced_n }) if result.succeeded
+        end
+
         state = nil
 
         case tape.element
@@ -97,6 +102,11 @@ module Elements
         result.merge({ state: result.succeeded ? :delimiter_n : :failed })
       end
 
+      def item_spaced_n(tape:, state_info:, args: {})
+        result = args[:subclass].process(tape: tape, **args)
+        result.merge({ state: result.succeeded ? :item_spaced_n : :success_compound })
+      end
+
       def delimiter_n(tape:, state_info:, args: {})
         state = nil
         case tape.element
@@ -107,7 +117,11 @@ module Elements
           tape.next
           state = :item_l
         else
-          state = :failed
+          if args[:allow_commas_only]
+            state = :success_compound
+          else
+            state = :failed
+          end
         end
 
         { tape: tape, state: state, args: args }
