@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-class TapeError < StandardError; end
-class EndOfTapeError < TapeError; end
-class StartOfTapeError < TapeError; end
+class TokenTapeError < StandardError; end
+class EndOfTokenTapeError < TokenTapeError; end
+class StartOfTokenTapeError < TokenTapeError; end
 
-class EndOfTape; end
+class EndOfTokenTape; end
 
 # A data structure that represents a "tape" of symbols to read, similar to a
 # Turing machine except this tape is read-only. In essence this boils down to
 # an Array and an Enumerator, but encapsulating it here makes the visuals easier
 # for me.
-class Tape
+class TokenTape
   attr_reader :position, :data
 
   def initialize(array, start_position: 0)
@@ -22,18 +22,18 @@ class Tape
 
     @data = array
     @position = start_position
-    @eot = EndOfTape.new
+    @eot = EndOfTokenTape.new
   end
 
   def next
-    raise EndOfTapeError if @position == @data.length
+    raise EndOfTokenTapeError if @position == @data.length
 
     @position += 1
     element
   end
 
   def prev
-    raise StartOfTapeError if @position == 0
+    raise StartOfTokenTapeError if @position == 0
 
     @position -= 1
     element

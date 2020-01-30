@@ -4,7 +4,7 @@ require_relative '../../elements/noun_clause'
 
 require_relative '../../elements/element'
 require_relative '../../elements/singular_noun'
-require_relative '../../structures/tape'
+require_relative '../../structures/token_tape'
 
 RSpec.describe Elements::NounClause do
   describe '.process' do
@@ -52,7 +52,7 @@ RSpec.describe Elements::NounClause do
 
     context 'valid clauses' do
       context 'the SingularNoun' do
-        let(:tape) { Tape.new(['the', 'SingularNoun']) }
+        let(:tape) { TokenTape.new(['the', 'SingularNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -81,7 +81,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the SingularNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -111,7 +111,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the SingularNoun PrepAdjPhr PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'SingularNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -141,7 +141,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun' do
-        let(:tape) { Tape.new(['the', 'PluralNoun']) }
+        let(:tape) { TokenTape.new(['the', 'PluralNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -170,7 +170,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -200,7 +200,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the PluralNoun PrepAdjPhr PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'PluralNoun', 'PrepAdjectivalPhrase', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -230,7 +230,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective SingularNoun' do
-        let(:tape) { Tape.new(['the', 'Adjective', 'SingularNoun']) }
+        let(:tape) { TokenTape.new(['the', 'Adjective', 'SingularNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -259,7 +259,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective SingularNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -289,7 +289,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective PluralNoun' do
-        let(:tape) { Tape.new(['the', 'Adjective', 'PluralNoun']) }
+        let(:tape) { TokenTape.new(['the', 'Adjective', 'PluralNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -318,7 +318,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'the Adjective PluralNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['the', 'Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['the', 'Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -348,7 +348,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an Adjective SingularNoun' do
-        let(:tape) { Tape.new(['a', 'Adjective', 'SingularNoun']) }
+        let(:tape) { TokenTape.new(['a', 'Adjective', 'SingularNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -377,7 +377,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an Adjective SingularNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['a', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['a', 'Adjective', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -407,7 +407,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an SingularNoun' do
-        let(:tape) { Tape.new(['a', 'SingularNoun']) }
+        let(:tape) { TokenTape.new(['a', 'SingularNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -436,7 +436,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'a|an SingularNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['a', 'SingularNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['a', 'SingularNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -466,7 +466,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'Adjective PluralNoun' do
-        let(:tape) { Tape.new(['Adjective', 'PluralNoun']) }
+        let(:tape) { TokenTape.new(['Adjective', 'PluralNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -495,7 +495,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'Adjective PluralNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['Adjective', 'PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -525,7 +525,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'PluralNoun' do
-        let(:tape) { Tape.new(['PluralNoun']) }
+        let(:tape) { TokenTape.new(['PluralNoun']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -549,7 +549,7 @@ RSpec.describe Elements::NounClause do
       end
 
       context 'PluralNoun PrepAdjPhr' do
-        let(:tape) { Tape.new(['PluralNoun', 'PrepAdjectivalPhrase']) }
+        let(:tape) { TokenTape.new(['PluralNoun', 'PrepAdjectivalPhrase']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error

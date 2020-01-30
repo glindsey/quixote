@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'element'
-require_relative '../structures/tape'
+
+require_relative '../structures/token_tape'
 
 module Elements
   # Dummy element used for testing.
@@ -18,12 +19,12 @@ module Elements
 
         element = tape.element
         if element.nil?
-          return fail("Tape element is nil", tape: tape)
+          return fail("TokenTape element is nil", tape: tape)
         end
 
         tape.next
         succeed(tape: tape, output: Dummy.new(element: element))
-      rescue EndOfTapeError
+      rescue EndOfTokenTapeError
         fail('Reached the end of the tape', tape: tape)
       end
     end

@@ -4,29 +4,34 @@ require_relative 'element'
 
 require_relative 'subject_clause'
 require_relative 'verb_object_clause'
+require_relative '../refinements/result_hashes'
 
 module Elements
   # Processor for statements.
   class Statement < Element
-    # TODO: lots of work to be done here
-    # A statement should be in the form:
-    # [subject clause] [verb-object clause]
-    # There are other possibilities but we're focusing on this right now.
+    class << self
+      using Refinements::ResultHashes
 
-    # Process I/O stacks. Returns hash containing tape, success keys.
-    def _process(tape:, **args)
+      # TODO: lots of work to be done here
+      # A statement should be in the form:
+      # [subject clause] [verb-object clause]
+      # There are other possibilities but we're focusing on this right now.
 
-      result = in_order([SubjectClause, VerbObjectClause], tape: tape, **args)
+      # Process I/O stacks. Returns hash containing tape, success keys.
+      def _process(tape:, **args)
+        result = in_order(handlers: [SubjectClause, VerbObjectClause],
+                          tape: tape, **args)
 
-      return fail(tape: tape) unless result.succeeded
+        return fail(tape: tape) unless result.succeeded
 
-      succeed(
-        tape: tape,
-        output: Statement.new(
-          subject: result[:output][0],
-          verb_object: result[:output][1]
+        succeed(
+          tape: tape,
+          output: Statement.new(
+            subject: result[:output][0],
+            verb_object: result[:output][1]
+          )
         )
-      )
+      end
     end
   end
 end

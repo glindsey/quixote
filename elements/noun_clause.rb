@@ -7,20 +7,20 @@ require_relative 'compound'
 require_relative 'prep_adjectival_phrase'
 require_relative 'plural_noun'
 require_relative '../mixins/state_machine'
-require_relative '../structures/tape'
+require_relative '../structures/token_tape'
 
 # Noun Clauses
 # =============
 # A noun clause follows a pattern like this:
 #
 # Definite singular/plural/proper:
-#   the [CompoundAdjective] [SingularNoun|PluralNoun|DefProperNoun] [PrepAdjectivalPhrase]*
+#   the Adjective* (SingularNoun|PluralNoun|DefProperNoun)+ PrepAdjectivalPhrase*
 #
 # Indefinite singular:
-#   (a|an) [CompoundAdjective] [SingularNoun] [PrepAdjectivalPhrase]*
+#   (a|an) Adjective* SingularNoun+ PrepAdjectivalPhrase*
 #
 # Indefinite plural/proper:
-#   [CompoundAdjective] [PluralNoun|IndefProperNoun] [PrepAdjectivalPhrase]*
+#   Adjective* (PluralNoun|IndefProperNoun)+ PrepAdjectivalPhrase*
 #
 
 STATE_TRACING = false

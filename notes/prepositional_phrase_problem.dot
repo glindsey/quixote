@@ -1,0 +1,92 @@
+digraph G
+{
+  node [
+    style = filled;
+  ]
+
+  // eat(the sandwich(that you made(at the table(in the cafeteria))))
+  subgraph "cluster_1" {
+    "1-eat"               [label="eat"];
+    "1-the-sandwich"      [label="the sandwich"];
+    "1-that-you-made"     [label="that you made"];
+    "1-at-the-table"      [label="at the table"];
+    "1-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "1-eat" -> "1-the-sandwich";
+    "1-the-sandwich" -> "1-that-you-made";
+    "1-that-you-made" -> "1-at-the-table";
+    "1-at-the-table" -> "1-in-the-cafeteria";
+  }
+
+  // eat(the sandwich(that you made(at the table, in the cafeteria))
+  subgraph "cluster_2" {
+    "2-eat"               [label="eat"];
+    "2-the-sandwich"      [label="the sandwich"];
+    "2-that-you-made"     [label="that you made"];
+    "2-at-the-table"      [label="at the table"];
+    "2-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "2-eat" -> "2-the-sandwich";
+    "2-the-sandwich" -> "2-that-you-made";
+    "2-that-you-made" -> "2-at-the-table";
+    "2-that-you-made" -> "2-in-the-cafeteria";
+  }
+
+
+
+  // eat(the sandwich(that you made, at the table(in the cafeteria)))
+  subgraph "cluster_3" {
+    "3-eat"               [label="eat"];
+    "3-the-sandwich"      [label="the sandwich"];
+    "3-that-you-made"     [label="that you made"];
+    "3-at-the-table"      [label="at the table"];
+    "3-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "3-eat" -> "3-the-sandwich";
+    "3-the-sandwich" -> "3-that-you-made";
+    "3-the-sandwich" -> "3-at-the-table";
+    "3-at-the-table" -> "3-in-the-cafeteria";
+  }
+
+  // eat(the sandwich(that you made, at the table, in the cafeteria))
+  subgraph "cluster_4" {
+    "4-eat"               [label="eat"];
+    "4-the-sandwich"      [label="the sandwich"];
+    "4-that-you-made"     [label="that you made"];
+    "4-at-the-table"      [label="at the table"];
+    "4-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "4-eat" -> "4-the-sandwich";
+    "4-the-sandwich" -> "4-that-you-made";
+    "4-the-sandwich" -> "4-at-the-table";
+    "4-the-sandwich" -> "4-in-the-cafeteria";
+  }
+
+  // eat(the sandwich(that you made), at the table(in the cafeteria))
+  subgraph "cluster_5" {
+    "5-eat"               [label="eat"];
+    "5-the-sandwich"      [label="the sandwich"];
+    "5-that-you-made"     [label="that you made"];
+    "5-at-the-table"      [label="at the table"];
+    "5-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "5-eat" -> "5-the-sandwich";
+    "5-the-sandwich" -> "5-that-you-made";
+    "5-eat" -> "5-at-the-table";
+    "5-at-the-table" -> "5-in-the-cafeteria";
+  }
+
+  // eat(the sandwich(that you made), at the table, in the cafeteria)
+  subgraph "cluster_6" {
+    "6-eat"               [label="eat"];
+    "6-the-sandwich"      [label="the sandwich"];
+    "6-that-you-made"     [label="that you made"];
+    "6-at-the-table"      [label="at the table"];
+    "6-in-the-cafeteria"  [label="in the cafeteria"];
+
+    "6-eat" -> "6-the-sandwich";
+    "6-the-sandwich" -> "6-that-you-made";
+    "6-eat" -> "6-at-the-table";
+    "6-eat" -> "6-in-the-cafeteria";
+  }
+}

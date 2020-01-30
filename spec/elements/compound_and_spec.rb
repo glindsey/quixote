@@ -2,7 +2,7 @@
 
 require_relative '../../elements/compound_and'
 require_relative '../../elements/dummy'
-require_relative '../../structures/tape'
+require_relative '../../structures/token_tape'
 
 RSpec.describe Elements::CompoundAnd do
   describe '.process' do
@@ -14,7 +14,7 @@ RSpec.describe Elements::CompoundAnd do
 
     context 'valid statements' do
       context 'when parsing a single element' do
-        let(:tape) { Tape.new(['dummy']) }
+        let(:tape) { TokenTape.new(['dummy']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -29,7 +29,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing the form "A and B"' do
-        let(:tape) { Tape.new(['A', 'and', 'B']) }
+        let(:tape) { TokenTape.new(['A', 'and', 'B']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -44,7 +44,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing the form "A, B and C"' do
-        let(:tape) { Tape.new(['A', ',', 'B', 'and', 'C' ]) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', 'and', 'C' ]) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -59,7 +59,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing the form "A, B, and C"' do
-        let(:tape) { Tape.new(['A', ',', 'B', ',', 'and', 'C' ]) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', ',', 'and', 'C' ]) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -78,7 +78,7 @@ RSpec.describe Elements::CompoundAnd do
       let(:args) { { allow_commas_only: false } }
 
       context 'when parsing "A, B"' do
-        let(:tape) { Tape.new(['A', ',', 'B']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B']) }
 
         it 'does not raise an exception' do
           expect { process(tape, args) }.not_to raise_error
@@ -105,7 +105,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A, B, C"' do
-        let(:tape) { Tape.new(['A', ',', 'B', ',', 'C']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', ',', 'C']) }
 
         it 'does not raise an exception' do
           expect { process(tape, args) }.not_to raise_error
@@ -136,7 +136,7 @@ RSpec.describe Elements::CompoundAnd do
       let(:args) { { allow_commas_only: true } }
 
       context 'when parsing "A, B"' do
-        let(:tape) { Tape.new(['A', ',', 'B']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B']) }
 
         it 'does not raise an exception' do
           expect { process(tape, args) }.not_to raise_error
@@ -151,7 +151,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A, B, C"' do
-        let(:tape) { Tape.new(['A', ',', 'B', ',', 'C']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', ',', 'C']) }
 
         it 'does not raise an exception' do
           expect { process(tape, args) }.not_to raise_error
@@ -170,7 +170,7 @@ RSpec.describe Elements::CompoundAnd do
       let(:args) { { allow_space_delimiters: false } }
 
       context 'when parsing "A B"' do
-        let(:tape) { Tape.new(['A', 'B']) }
+        let(:tape) { TokenTape.new(['A', 'B']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -204,7 +204,7 @@ RSpec.describe Elements::CompoundAnd do
       let(:args) { { allow_space_delimiters: true } }
 
       context 'when parsing "A B"' do
-        let(:tape) { Tape.new(['A', 'B']) }
+        let(:tape) { TokenTape.new(['A', 'B']) }
 
         it 'does not raise an exception' do
           expect { process(tape, args) }.not_to raise_error
@@ -221,7 +221,7 @@ RSpec.describe Elements::CompoundAnd do
 
     context 'invalid statements' do
       context 'when parsing "A,' do
-        let(:tape) { Tape.new(['A', ',']) }
+        let(:tape) { TokenTape.new(['A', ',']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -248,7 +248,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A and"' do
-        let(:tape) { Tape.new(['A', 'and']) }
+        let(:tape) { TokenTape.new(['A', 'and']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -275,7 +275,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A, B,"' do
-        let(:tape) { Tape.new(['A', ',', 'B', ',']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', ',']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -302,7 +302,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A, B and"' do
-        let(:tape) { Tape.new(['A', ',', 'B', 'and']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', 'and']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error
@@ -329,7 +329,7 @@ RSpec.describe Elements::CompoundAnd do
       end
 
       context 'when parsing "A, B, and"' do
-        let(:tape) { Tape.new(['A', ',', 'B', ',', 'and']) }
+        let(:tape) { TokenTape.new(['A', ',', 'B', ',', 'and']) }
 
         it 'does not raise an exception' do
           expect { process(tape) }.not_to raise_error

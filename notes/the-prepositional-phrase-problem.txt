@@ -81,3 +81,123 @@ Note that this still requires a little shifting around of processors. The object
     +------------------------------------------------------------+
 
 It works. It's slightly unwieldy, but it works.
+
+*** UPDATE: it doesn't work.
+
+Consider "eat your sandwich at the table"
+This is *not* a transitive verb, but "at the table" applies to "eat", not "sandwich".
+
+Worse, "eat the sandwich that you made at the table in the cafeteria":
+
+| eat | the sandwich | that you made | at | the table | in | the cafeteria |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | Noun          |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | Noun          |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | NounClause    |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | PrepAdjPhrase      |
+| Vrb | Noun         | PrepAdjPhrase | Pr | NounClause                     |
+| Vrb | Noun         | PrepAdjPhrase | PrepAdjPhrase                       |
+| Vrb | Noun         | PrepAdjPhrase*                                      |
+| Vrb | NounClause                                                         |
+
+=== OR ===
+
+| eat | the sandwich | that you made | at | the table | in | the cafeteria |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | Noun          |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | Noun          |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | NounClause    |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | PrepAdjPhrase      |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | PrepAdvPhrase      |
+| Vrb | Noun         | PrepAdjPhrase | PrepAdjPhrase  | PrepAdvPhrase      |
+| Vrb | Noun         | PrepAdjPhrase*                 | PrepAdvPhrase      |
+
+=== OR ===
+| eat | the sandwich | that you made | at | the table | in | the cafeteria |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | Noun          |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | Pr | NounClause    |
+| Vrb | Noun         | PrepAdjPhrase | Pr | Noun      | PrepAdjPhrase      |
+| Vrb | Noun         | PrepAdjPhrase | Pr | NounClause                     |
+| Vrb | Noun         | PrepAdjPhrase | PrepAdvPhrase                       |
+| Vrb | NounClause                   | PrepAdvPhrase                       |
+
+I've been forgetting that an adjectival phrase might modify the subject of another adjectival phrase.
+"that you made" 
+    -- can only be an adjectival phrase
+        -- which modifies "sandwich"
+"at the table"
+    -- can be an adverbial phrase
+        -- can modify "eat" OR "made"
+    -- can be an adjectival phrase
+        -- maybe can modify "sandwich", but that seems awkward
+"in the cafeteria"
+    -- can be an adverbial phrase
+        -- can modify "eat" or "made"
+    -- can be an adjectival phrase
+        -- can modify "table"
+        -- maybe can modify "sandwich" or "you", but those seem awkward
+
+Maybe the best option is to *always* split parsing when encountering a prepositional phrase
+
+eat(the sandwich(that you made(at the table(in the cafeteria))))
+eat(the sandwich(that you made(at the table, in the cafeteria))
+eat(the sandwich(that you made, at the table(in the cafeteria)))
+eat(the sandwich(that you made, at the table, in the cafeteria))
+eat(the sandwich(that you made), at the table(in the cafeteria))
+eat(the sandwich(that you made), at the table, in the cafeteria)
+
+I *think* those are the six possible ways to parse that phrase
+
+God, what a nightmare.
+
+EDIT: I was wrong, actually there are *TWELVE* possible parsing solutions.
+
+### Multi-Phase Solution
+
+Thought of this on my way home yesterday. Instead of bothering with matching up the prepositional phrases during the initial sentence processing, we only identify them initially, and then match them in a second phase -- the Prepositional Phrase Parsing Phase.
+
+I've been waiting to say that.
+
+Anyways, with this solution, after the initial sentence parsing is done we have:
+
+    you | eat | the sandwich | that you made | at the table | in the cafeteria
+    SCl | VCl | ObjectClause | PrepPhrase    | PrepPhrase   | PrepPhrase
+
+#### Prepositional Phrase Types: Advanced
+
+It turns out that, in addition to adverbial/adjectival phrase types for classifying prepositional phrases, there's another dimension, which is what sort of _additional_ phrases can modify the phrase.
+
+- Adjectival phrase: modifies a noun
+    + Adjectival noun phrase: modifies a noun, can be modified by adjectival phrase
+        * Example: "in the den" (subsequent phrase modifies 'den')
+    + Adjectival verb phrase: modifies a noun, can be modified by adverbial phrase
+        * Example: "that you brought" (subsequent phrase modifies 'brought')
+- Adverbial phrase: modifies a verb
+    + Adverbial noun phrase: modifies a verb, can be modified by adjectival phrase
+        * Example: "to the market" (subsequent phrase modifies 'market')
+    + Adverbial verb phrase: modifies a verb, can be modified by adverbial phrase
+        * Example: "while you talk" (subsequent phrase modifies 'talk')
+
+In the above sentence:
+
+    you | eat | the sandwich | that you made | at the table | in the cafeteria
+    SCl | VCl | ObjectClause | PrepPhrase    | PrepPhrase   | PrepPhrase
+
+- "that you made" is an adjectival verb phrase
+    + It must modify the verb "eat"
+- "at the table" can either be an adjectival noun phrase or an adverbial noun phrase.
+    + As an adjectival noun phrase, it can modify "the sandwich".
+    + As an adverbial noun phrase, it can modify either "eat" or the "made" in "that you made".
+- "in the cafeteria" can also either be an adjectival noun phrase or an adverbial noun phrase.
+    + As an adjectival noun phrase, it can modify "the sandwich", or the "table" in "at the table".
+    + As an adverbial noun phrase, it can modify either "eat" or the "made" in "that you made".
+
+In general:
+- An adjectival phrase may modify:
+    + The object of the sentence
+    + The object of the last-encountered noun phrase
+- An adverbial phrase may modify:
+    + The verb of the sentence
+    + The verb of the last-encountered verb phrase
+
+(TODO: Check these rules, but I *think* they are at least 95% correct.)
+
+

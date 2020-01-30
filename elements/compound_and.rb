@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 require_relative 'element'
+
 require_relative '../mixins/state_machine'
-require_relative '../structures/tape'
+require_relative '../structures/token_tape'
 
 # A and B
 # A, B and C

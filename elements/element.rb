@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../mixins/unimplemented_element'
+require_relative '../mixins/processor_helpers'
 require_relative '../refinements/result_hashes'
-require_relative '../structures/tape'
+require_relative '../structures/token_tape'
 
 module Elements
   attr_reader :args
@@ -13,24 +13,25 @@ module Elements
   # Virtual class for implementing a stack processor.
   class Element
     class << self
+      extend Mixins::ProcessorHelpers
       using Refinements::ResultHashes
 
       # Process I/O stacks. Returns hash containing tape, success keys.
       def process(tape:, **args)
         if SANITY_CHECKS
-          unless tape.is_a?(Tape)
-            raise ArgumentError, "`tape` must be a Tape object"
+          unless tape.is_a?(TokenTape)
+            raise ArgumentError, "`tape` must be a TokenTape object"
           end
           unless args.is_a?(Hash)
             raise ArgumentError, "Args must be a Hash"
           end
         end
 
+        if DEBUG_TRACING
+          warn "-- #{self.name}: Processing tape = #{tape}, args = #{args}"
+        end
+
         if self.respond_to?(:_process)
-          if DEBUG_TRACING
-            warn "-- #{self.name}: Processing " \
-                 "tape = #{tape}, args = #{args}"
-          end
 
           result = _process(tape: tape.dup, **args)
 
@@ -38,7 +39,7 @@ module Elements
 
           result
         else
-          raise NotImplementedError, 'Subclass must implement `_process`'
+          raise NotImplementedError, "Subclass #{self.name} must implement `_process`"
         end
       end
 
@@ -51,6 +52,20 @@ module Elements
           warn "-- #{self.name}: Trying #{handler}" if DEBUG_TRACING
 
           result = handler.process(tape: tape, **args)
+
+          return result if result.succeeded
+        end
+
+        fail("No handler in #{handlers} succeeded in parsing", tape: tape)
+      end
+
+      # Just like `try` above, except we wrap the handlers in Compound elements.
+      def try_compound(handlers:, tape:, **args)
+
+        handlers.each do |handler|
+          warn "-- #{self.name}: Trying Compound(#{handler})" if DEBUG_TRACING
+
+          result = Compound.process(tape: tape, subclass: handler, **args)
 
           return result if result.succeeded
         end
